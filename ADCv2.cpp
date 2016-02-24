@@ -1,35 +1,35 @@
 #include "Arduino.h"
-#include "ADCv1.h"
+#include "ADCv2.h"
 #include <avr/interrupt.h>
 #define disabledADC 0;
 #define enabledADC 1;
 typedef union{
-  uint16_t mixVar;
-  uint8_t byteVar[2];
+	uint16_t mixVar;
+	uint8_t byteVar[2];
 }combo;
 struct adcStruct{
-  uint8_t pin;
-  combo adc_value;  
+	uint8_t pin;
+	combo adc_value; 
+	uint8_t ADMUXpin;  
 }; struct adcStruct adcStruct[8];
 uint8_t _adcTail;
 uint8_t current;
-ADCv1::ADCv1(){
+ADCv2::ADCv2(){
 	_adcTail = 0;
 	current = 0;
 }
-void ADCv1::enable(uint8_t pin){
+void ADCv2::enable(uint8_t pin){
 	adcStruct[_adcTail].pin = pin;
+	adcStruct[_adcTail].ADMUXpin = pin + 0x40;
 	_adcTail++;
 	DIDR0 = 0x01 << pin;
-}
-
-void ADCv1::setMode(uint8_t mode){
-	ADMUX = 0x40 + adcStruct[current].pin;
+	ADMUX = adcStruct[current].ADMUXpin;
 	ADCSRA = 0x8F;
 	ADCSRA |=0x40;
 }
 
-uint16_t ADCv1::getReading(uint8_t pin){
+
+uint16_t ADCv2::getReading(uint8_t pin){
 	for(uint8_t k=0; k<_adcTail; k++){
 		if(adcStruct[k].pin == pin){
 			return adcStruct[k].adc_value.mixVar;
@@ -44,6 +44,6 @@ ISR(ADC_vect){
   if(current==_adcTail){
     current=0;
   }
-  ADMUX = 0x40 + adcStruct[current].pin;
+  ADMUX = adcStruct[current].ADMUXpin;
   ADCSRA |= 0x40;
 }
