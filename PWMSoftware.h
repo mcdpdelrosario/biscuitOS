@@ -7,7 +7,7 @@ class PWMSoftware
 {
 	public:
 	PWMSoftware(uint8_t timerNo, uint8_t ocrLetter);
-	void setPeriod1(uint16_t noofTicks);
+	void setPeriod(uint16_t noofTicks);
 	void setPWM(uint16_t noofTicks);
 	private:
 	volatile uint16_t *_OCRnX;
