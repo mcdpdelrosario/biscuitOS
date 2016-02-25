@@ -13,7 +13,7 @@ class Battery
   public:
   
   void enable(uint8_t pin);
-  uint16_t getReading();
+  uint16_t getReading(uint8_t pin);
   
   private:
  
