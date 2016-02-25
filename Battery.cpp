@@ -2,7 +2,7 @@
 #include "Arduino.h"
 #include "Battery.h"
 
-
+byte analog_num = 0x00;
 struct adc{
   long adc_value = 0;
   int samples = 0;      //incase madaming pin na basahin
@@ -25,12 +25,12 @@ void Battery::enable(uint8_t pin)
 } 
 
 
-uint16_t Battery::getReading()
+uint16_t Battery::getReading(uint8_t pin)
 {
   uint16_t voltage;
   voltage = (adc[_pin].adc_value/adc[_pin].samples);
-  adc[_pin].adc_value = 0;
-  adc[_pin].samples = 0; 
+  adc[analog_num].adc_value = 0;
+  adc[analog_num].samples = 0; 
 
 
   return voltage;
@@ -39,10 +39,11 @@ uint16_t Battery::getReading()
 
 
 ISR(ADC_vect) {
-  adc[_pin].adc_value += ADCL;        // store lower byte ADC
-  adc[_pin].adc_value += ADCH << 8;  // store higher bytes ADC
-  adc[_pin].samples++;           //increment samples, kaya isr,, may samples.
+  adc[analog_num].adc_value += ADCL;        // store lower byte ADC
+  adc[analog_num].adc_value += ADCH << 8;  // store higher bytes ADC
+  adc[analog_num].samples++;           //increment samples, kaya isr,, may samples.
 
+  analog_num++;
   ADCSRA = 0x8F;                            // Enable the ADC, Interrupt with 128 prescaler
   ADCSRA |=B01000000;                       //Restart the conversion
 }
