@@ -11,5 +11,5 @@ class ADCv2
 	uint16_t getReading(uint8_t pin);
   private:
 };
-
+static ADCv2 rADC;
 #endif
