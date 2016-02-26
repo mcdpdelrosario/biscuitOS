@@ -10,8 +10,7 @@ class biscuitos
     void addProcess(void (*pointF)(), uint16_t nextmS);
 	void printQueue(); //for debugging
 	void start();
-	
   private:
 };
-
+static biscuitos rScheduler;
 #endif
