@@ -1,12 +1,18 @@
 #include <ADCv2.h>
-ADCv2 adc1;
+#include <biscuitos.h>
+#include <Motor.h>
+#include <myWifi.h>
+#include <PWMSoftware.h>
+
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   /*for(uint8_t a=0;a<5;a++){
   adc1.enable(a);
   }*/
-  adc1.enable(0);
+  ADCe.enable(0);
   
   
 }
@@ -19,5 +25,5 @@ void loop() {
   Serial.print("\t");
   }
   Serial.print("\n");*/
-  Serial.println(adc1.getReading(0));
+  Serial.println(ADCe.getReading(0));
 }
