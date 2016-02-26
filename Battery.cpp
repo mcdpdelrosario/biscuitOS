@@ -13,7 +13,7 @@ struct adc adc[5];
 volatile uint8_t _pin;
  
  
-void Battery::enable(uint8_t pin)
+void Battery::enable1(uint8_t pin)
 {
   _pin = pin;
   DIDR0 = 0x3F;         //disable all digital pins
@@ -25,7 +25,7 @@ void Battery::enable(uint8_t pin)
 } 
 
 
-uint16_t Battery::getReading(uint8_t pin)
+uint16_t Battery::getReading1(uint8_t pin)
 {
   uint16_t voltage;
   voltage = (adc[_pin].adc_value/adc[_pin].samples);
@@ -38,7 +38,7 @@ uint16_t Battery::getReading(uint8_t pin)
 
 
 
-ISR(ADC_vect) {
+/* ISR(ADC_vect) {
   adc[analog_num].adc_value += ADCL;        // store lower byte ADC
   adc[analog_num].adc_value += ADCH << 8;  // store higher bytes ADC
   adc[analog_num].samples++;           //increment samples, kaya isr,, may samples.
@@ -46,7 +46,7 @@ ISR(ADC_vect) {
   analog_num++;
   ADCSRA = 0x8F;                            // Enable the ADC, Interrupt with 128 prescaler
   ADCSRA |=B01000000;                       //Restart the conversion
-}
+} */
 
 
 
