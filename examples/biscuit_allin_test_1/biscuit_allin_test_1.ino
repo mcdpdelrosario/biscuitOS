@@ -1,6 +1,5 @@
 #include <ADCv2.h>
 #include <biscuitos.h>
-#include <Motor.h>
 #include <myWifi.h>
 #include <PWMSoftware.h>
 void setup() {
