@@ -12,12 +12,12 @@ void setup() {
   // put your setup code here, to run once:
  Serial.begin(9600);
 
-p1.setPeriod1(312);
-p2.setPeriod1(312);
-p3.setPeriod1(312);
-p11.setPeriod1(312);
-p21.setPeriod1(312);
-p31.setPeriod1(312);
+p1.setPeriod(312);
+p2.setPeriod(312);
+p3.setPeriod(312);
+p11.setPeriod(312);
+p21.setPeriod(312);
+p31.setPeriod(312);
 
 }
 
