@@ -1,8 +1,12 @@
 #include <ADCv2.h>
 #include <biscuitos.h>
 #include <Motor.h>
-#include <myWifi.h>
 #include <PWMSoftware.h>
+#include <ServoEnhance.h>
+#include <UARTv1.h>
+#include <Wifi.h>
+
+
 
 
 
@@ -12,7 +16,7 @@ void setup() {
   /*for(uint8_t a=0;a<5;a++){
   adc1.enable(a);
   }*/
-  ADCe.enable(0);
+  rADC.enable(0);
   
   
 }
@@ -25,5 +29,5 @@ void loop() {
   Serial.print("\t");
   }
   Serial.print("\n");*/
-  Serial.println(ADCe.getReading(0));
+  Serial.println(rADC.getReading(0));
 }

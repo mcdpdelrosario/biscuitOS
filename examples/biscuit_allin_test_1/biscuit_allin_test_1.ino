@@ -1,7 +1,12 @@
 #include <ADCv2.h>
 #include <biscuitos.h>
-#include <myWifi.h>
+#include <Motor.h>
 #include <PWMSoftware.h>
+#include <ServoEnhance.h>
+#include <UARTv1.h>
+#include <Wifi.h>
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
