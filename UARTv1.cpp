@@ -25,9 +25,9 @@ void UARTv1::print(String data){
   uint8_t temp;
   temp = getLength(data);
   for(uint8_t i=0;i<temp;i++){
-	 Enqueue(SQ, data[i]);
+   Enqueue(SQ, data[i]);
   }
-	UCSR0B |= 0x20;
+  UCSR0B |= 0x20;
 }
 char UARTv1::receive(){
   return Dequeue(RQ);
@@ -65,11 +65,11 @@ ISR(USART0_RX_vect){
 }
 volatile uint8_t Qtemp;
 ISR(USART0_UDRE_vect){
-	
-	Qtemp = Dequeue(SQ);
-	if(Qtemp == 0x00)
-		UCSR0B &= 0xDF;
-	else
-  		UDR0 = Qtemp;
+  
+  Qtemp = Dequeue(SQ);
+  if(Qtemp == 0x00)
+    UCSR0B &= 0xDF;
+  else
+      UDR0 = Qtemp;
   //UCSR0B &= 0xDF; //disable ISR UART transmit
 }

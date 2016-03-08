@@ -69,9 +69,6 @@ void sendData(String command, const int timeout){
 }
 
 void Wifi::initialize(uint16_t baud, String apName, String pass){
-	pinMode(43,OUTPUT);
-	pinMode(42,OUTPUT);
-
   Transceiver.baud(baud);
   sendData("AT+CWJAP=\""+apName+"\",\""+pass+"\"\r\n",8000);  
 }
@@ -81,8 +78,6 @@ void Wifi::listen(String portNumber, String IP){
   sendData("AT+CIPSERVER=1,"+portNumber+"\r\n",2000);
   sendData("AT+CIPSTA=\""+IP+"\"\r\n",3000);
   Transceiver.print("Connect Now!\n");
-  pinMode(13,OUTPUT);
-  digitalWrite(13,HIGH);
 }
 
 boolean statemachine = LOW;
