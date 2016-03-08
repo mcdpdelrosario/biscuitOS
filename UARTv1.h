@@ -6,8 +6,9 @@
 class UARTv1
 {
   public:
-	void baud(uint16_t);
+	void start(uint16_t);
     void print(String data);
+    void println(String data);
 	char receive(); //for debugging
 	uint8_t peek();
   private:
