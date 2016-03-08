@@ -3,12 +3,12 @@
 
 uint8_t tempTCCRnA = 0x00; 
 uint8_t tempTCCRnB = 0x00;
+PWMSoftware::PWMSoftware(){
 
+}
 
-
-void PWMSoftware::initialize(uint8_t timerNo, uint8_t ocrLetter)
-{
-	_timerNo = timerNo;
+void PWMSoftware::init(uint8_t timerNo, uint8_t ocrLetter){
+_timerNo = timerNo;
 _ocrLetter = ocrLetter;
 tempTCCRnB = 0x1D; 
 if (_timerNo == 3) {
@@ -65,9 +65,12 @@ else{
 		tempTCCRnA &= 0xFA;
 	}
 	
-}	
-
+}		
+	
+	
+	
 }
+
 void PWMSoftware::setPeriod(uint16_t noofTicks){
 *_ICRn = noofTicks;
 *_TCCRnA = tempTCCRnA;
