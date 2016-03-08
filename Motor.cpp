@@ -2,6 +2,7 @@
 #include "Arduino.h"
 #include "Motor.h"
 #include "PWMSoftware.h"  
+#include "UARTv1.h"  
 
 #include <avr/interrupt.h>
 #define MAX_MOTORS 2
@@ -14,42 +15,20 @@ struct motors
   volatile uint16_t rotations=0;
   uint32_t lastProcessTime;
   uint16_t actualSpeed;
+  uint16_t targetSpeed;
   int percent;
   uint16_t period;
   PWMSoftware motorControl;
 };
 struct motors m[MAX_MOTORS];
 
-
-
-
-
 byte _num;
-
-
-void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin, float diameter)
-{
+void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin, float diameter){
 
 	EICRB = B10100000;  //enable int 7 and int 6 falling edge
   EIMSK = B11000000;
 	m[num].motorPWMPin = motorPWMPin;
 	m[num].motorDirectionPin = motorDirectionPin;
-
-
-  // if(m[num]._motorPWMPin==2)
-  // {
-  //  m[num].motorControl.initialize(3,3);
-  // }
-
-  // else if(m[num]._motorPWMPin==3)
-  // {
-  //   motorControl.initialize(3,2);
-  // }
-
-  // else if(_motorPWMPin==5)
-  // {
-  //   motorControl.initialize(3,1);
-  // }
 
  if(m[num].motorPWMPin==6)
 	{
@@ -76,7 +55,7 @@ void Motor::setPeriod(byte num, uint16_t period)
 {
  uint16_t numberofticksTime;
  
-m[num].period = m[num].period;
+  m[num].period = m[num].period;
   if (m[num].period > 20)
   {
     m[num].period = 20;
@@ -90,9 +69,6 @@ void Motor::setTime(byte num, int percent)
 {
   uint16_t numberofticksTimeD;
   uint16_t percentDuty;
-  
-
-  
   m[num].percent = percent;                          
   percentDuty = (m[num].period*m[num].percent)/100;                   
   numberofticksTimeD = percentDuty/(64e-3); 
@@ -100,26 +76,56 @@ void Motor::setTime(byte num, int percent)
 
 }
 
-
-void Motor::setTarget(byte num, uint16_t targetspeedTime)
+void Motor::setTarget(byte num, uint16_t targetSpeed)
 {
-
+ m[num].targetSpeed = targetSpeed;
 }
 
-uint16_t Motor::getSpeed(byte num)
+
+void Motor::correctSpeed(byte num)
 {
 
+ 
+  computeSpeed(num);
+  uint8_t proportionalConstant = 3;
+
+  if(m[num].actualSpeed>m[num].targetSpeed)
+  {
+     m[num].percent = m[num].percent - proportionalConstant; 
+    
+    if(m[num].percent<=3)
+    {
+      m[num].percent = 3;
+    }
+  }
+
+  else if(m[num].actualSpeed<m[num].targetSpeed)
+  {
+    m[num].percent = m[num].percent+proportionalConstant;
+    if(m[num].percent>=99)
+    {
+      m[num].percent = 99;
+    }
+  }
+
+  setTime(num,m[num].percent);
+}
+
+void Motor::computeSpeed(byte num)
+{
 	uint32_t temp;
 	uint32_t timePassed;
 	temp = m[num].rotations;
 	m[num].rotations = 0;
 	timePassed = millis() - m[num].lastProcessTime;
 	m[num].lastProcessTime = millis();
-	m[num].actualSpeed = ((temp)*2000)/timePassed;
-	return m[num].actualSpeed;
-
+	m[num].actualSpeed = temp;
 }
 
+uint16_t Motor::getSpeed(byte num)
+{
+  return m[num].actualSpeed;
+}
 
 ISR(INT6_vect)
 {
