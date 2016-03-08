@@ -53,24 +53,24 @@ void biscuitos::addProcess(void (*pointF)(),uint16_t nextmS){
 	_processNum++;
 	
 }
-void printAR(){
-	for(uint8_t z = 0; z<_processNum;z++){
-		Serial.print(PCB[z].ID);
-		Serial.print("\t");
-		Serial.print(PCB[z].timeTotal.varint);
-		Serial.print("\t");
-	} 
-	Serial.print("\n");
-	for(uint8_t z = 0; z<_PQTail;z++){
-		Serial.print(PQ[z].IDpt);
-		Serial.print("\t");
-		Serial.print(PQ[z].rTime.varint);
-		Serial.print("\t");
-	}
-	Serial.print("\n");
-}
+// void printAR(){
+// 	for(uint8_t z = 0; z<_processNum;z++){
+// 		Serial.print(PCB[z].ID);
+// 		Serial.print("\t");
+// 		Serial.print(PCB[z].timeTotal.varint);
+// 		Serial.print("\t");
+// 	} 
+// 	Serial.print("\n");
+// 	for(uint8_t z = 0; z<_PQTail;z++){
+// 		Serial.print(PQ[z].IDpt);
+// 		Serial.print("\t");
+// 		Serial.print(PQ[z].rTime.varint);
+// 		Serial.print("\t");
+// 	}
+// 	Serial.print("\n");
+// }
 void biscuitos::printQueue(){
-	printAR();
+	// printAR();
 }
 void biscuitos::start(){
 	TCNT2 = 0;
