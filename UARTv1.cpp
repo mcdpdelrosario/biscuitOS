@@ -12,7 +12,7 @@ struct DataQ DataQ[2];
 void Enqueue(uint8_t queue_number, char data);
 char Dequeue(uint8_t queue_number);
 uint8_t getLength(String str);
-void UARTv1::baud(uint16_t baudRate){
+void UARTv1::start(uint16_t baudRate){
     UCSR0A = 0x02;
     UCSR0C = 0x06;
     UBRR0 = 207;
@@ -27,6 +27,15 @@ void UARTv1::print(String data){
   for(uint8_t i=0;i<temp;i++){
    Enqueue(SQ, data[i]);
   }
+  UCSR0B |= 0x20;
+}
+void UARTv1::println(String data){
+  uint8_t temp;
+  temp = getLength(data);
+  for(uint8_t i=0;i<temp;i++){
+   Enqueue(SQ, data[i]);
+  }
+  Enqueue(SQ, '\n');
   UCSR0B |= 0x20;
 }
 char UARTv1::receive(){

@@ -11,8 +11,9 @@ struct motors
   uint8_t motorPWMPin;
   uint8_t motorDirectionPin;
   float diameter;
-  volatile uint32_t previousTime;
-  volatile float getSpeedTime = 0;
+  volatile uint16_t rotations=0;
+  uint32_t lastProcessTime;
+  uint16_t actualSpeed;
   int percent;
   uint16_t period;
   PWMSoftware motorControl;
@@ -102,96 +103,30 @@ void Motor::setTime(byte num, int percent)
 
 void Motor::setTarget(byte num, uint16_t targetspeedTime)
 {
-  byte proportionalConstant = 5;
- 
-  if(targetspeedTime<m[num].getSpeedTime)
-  {
-    m[num].percent = m[num].percent + 1;
-    if(m[num].percent>=99)
-    {
-      m[num].percent = 99;
-    }
-    setTime(num,m[num].percent);
-  }
-
-else if(targetspeedTime>m[num].getSpeedTime)
-  {
-    m[num].percent = m[num].percent - 1;
-    
-    if(m[num].percent<=1)
-    {
-      m[num].percent = 1;
-    }
-    setTime(num,m[num].percent);
-  }
-
- // Serial.println(m[num].percent);
- // Serial.println(targetspeedTime);
- // Serial.println(m[num].getSpeedTime);
-  // if(numberofticksTarget>m[num].getSpeedTime)
-  // {
-  //   m[num].percent = m[num].percent + 1;
-
-  //   if(m[num].percent>=99)
-  //   {
-  //     m[num].percent = 99;
-  //   }
-  // }
-
-  // else if(numberofticksTarget<m[num].getSpeedTime)
-  // {
-  //     m[num].percent = m[num].percent - 1;    
-    
-  //   if(m[num].percent<=1)
-  //   {
-  //     m[num].percent = 1;
-  //   }
-  // }
-
-  setTime(num,m[num].percent);
-  //Serial.println(_percent);
-
-
-    // if(targetspeedTime<m[num].getSpeedTime)
-    // {
-    //     _percent = _percent + proportionalConstant;
-    //     if(_percent>=99)
-    //     {
-    //       _percent = 99;
-    //     }
-    //     setTime(num,_percent);
-
-    // }
-
-    // else if(targetspeedTime>m[num].getSpeedTime)
-    // {
-
-    //   _percent = _percent - proportionalConstant;
-
-    //   if(_percent<=3)
-    //     {
-    //       _percent = 3;
-    //     }
-    //   setTime(num,_percent);
-    // }
 
 }
 
 uint16_t Motor::getSpeed(byte num)
 {
-  return m[num].getSpeedTime;
+
+	uint32_t temp;
+	uint32_t timePassed;
+	temp = m[num].rotations;
+	m[num].rotations = 0;
+	timePassed = millis() - m[num].lastProcessTime;
+	m[num].lastProcessTime = millis();
+	m[num].actualSpeed = ((temp)*2000)/timePassed;
+	return m[num].actualSpeed;
+
 }
 
 
 ISR(INT6_vect)
 {
-
-  m[0].getSpeedTime = millis() - m[0].previousTime;
-  m[0].previousTime = millis();
+	m[0].rotations++;
 }
 
 ISR(INT7_vect)
 {
-  m[1].getSpeedTime = millis() - m[1].previousTime;
-  m[1].previousTime = millis();
+	m[1].rotations++;
 } 
