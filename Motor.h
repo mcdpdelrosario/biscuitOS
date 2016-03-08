@@ -25,6 +25,6 @@ class Motor
   
 
 };
-
+static Motor motors;
 #endif
 
