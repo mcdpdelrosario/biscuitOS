@@ -15,8 +15,9 @@ class Motor
     void setPeriod(byte num, uint16_t period);
     void setTime(byte num, int percent);
     uint16_t getSpeed(byte num);  
-    void setTarget(byte num, uint16_t targetspeedTime);
-
+    void setTarget(byte num, uint16_t targetSpeed);
+    void correctSpeed(byte num);
+    void computeSpeed(byte num);
   private:
   	uint8_t _motorPWMPin;
  	  uint8_t _motorDirectionPin;
