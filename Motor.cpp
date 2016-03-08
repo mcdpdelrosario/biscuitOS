@@ -55,13 +55,14 @@ void Motor::setPeriod(byte num, uint16_t period)
 {
  uint16_t numberofticksTime;
  
-  m[num].period = m[num].period;
+  m[num].period = period;
   if (m[num].period > 20)
   {
     m[num].period = 20;
   }
   numberofticksTime = m[num].period / (64e-3);
   m[num].motorControl.setPeriod(numberofticksTime);
+  
 
 }
 
@@ -69,10 +70,11 @@ void Motor::setTime(byte num, int percent)
 {
   uint16_t numberofticksTimeD;
   uint16_t percentDuty;
+
   m[num].percent = percent;                          
   percentDuty = (m[num].period*m[num].percent)/100;                   
   numberofticksTimeD = percentDuty/(64e-3); 
- 	m[num].motorControl.setPWM(numberofticksTimeD);
+ 	m[num].motorControl.setPWM(percent);
 
 }
 
@@ -109,6 +111,9 @@ void Motor::correctSpeed(byte num)
   }
 
   setTime(num,m[num].percent);
+  Transceiver.println((String)m[num].percent);
+  Transceiver.println((String)"-------");
+   
 }
 
 void Motor::computeSpeed(byte num)
