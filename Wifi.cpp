@@ -11,29 +11,29 @@ void control(char Command) {
     case 'X':
     	digitalWrite(42,LOW);
     	digitalWrite(43,LOW);
-    	motorLeft.setPWM(10);
-    	motorRight.setPWM(10);
+    	//motorLeft.setPWM(10);
+    	//motorRight.setPWM(10);
         Transceiver.print("S\n");
       break;
     case 'W':
     	digitalWrite(42,LOW);
     	digitalWrite(43,LOW);
-    	motorLeft.setPWM(300);
-    	motorRight.setPWM(300);
+    	//motorLeft.setPWM(300);
+    	//motorRight.setPWM(300);
         Transceiver.print("W\n");
       break;
     case 'D':
     	digitalWrite(42,LOW);
     	digitalWrite(43,LOW);
-    	motorLeft.setPWM(150);
-    	motorRight.setPWM(300);
+    	//motorLeft.setPWM(150);
+    	//motorRight.setPWM(300);
         Transceiver.print("D\n");
       break;
     case 'A':
     	digitalWrite(42,LOW);
     	digitalWrite(43,LOW);
-    	motorLeft.setPWM(300);
-    	motorRight.setPWM(150);
+    	//motorLeft.setPWM(300);
+    	//motorRight.setPWM(150);
         Transceiver.print("A\n");
       break;
 
@@ -41,8 +41,8 @@ void control(char Command) {
     	//digitalWrite(42,)
     	digitalWrite(42,HIGH);
     	digitalWrite(43,HIGH);
-    	motorLeft.setPWM(300);
-    	motorRight.setPWM(300);
+    	//motorLeft.setPWM(300);
+    	//motorRight.setPWM(300);
         Transceiver.print("S\n");
       break;
     case 'F':

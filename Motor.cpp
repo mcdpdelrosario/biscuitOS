@@ -52,12 +52,12 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
 
  if(m[num].motorPWMPin==6)
 	{
-		m[num].motorControl.initialize(1,2);
+		m[num].motorControl.init(1,2);
 	}
 
 	else if(m[num].motorPWMPin==7)
 	{
-		m[num].motorControl.initialize(1,3);
+		m[num].motorControl.init(1,3);
 	}
 
   // else if(_motorPWMPin==9)
@@ -67,7 +67,7 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
 
   else
   {
-    Serial.println("Not applicable PWM to your desired pin");
+    //Serial.println("Not applicable PWM to your desired pin");
   }
 }
 
@@ -125,9 +125,9 @@ else if(targetspeedTime>m[num].getSpeedTime)
     setTime(num,m[num].percent);
   }
 
-  Serial.println(m[num].percent);
-  Serial.println(targetspeedTime);
-  Serial.println(m[num].getSpeedTime);
+ // Serial.println(m[num].percent);
+ // Serial.println(targetspeedTime);
+ // Serial.println(m[num].getSpeedTime);
   // if(numberofticksTarget>m[num].getSpeedTime)
   // {
   //   m[num].percent = m[num].percent + 1;
