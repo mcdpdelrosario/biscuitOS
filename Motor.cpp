@@ -13,7 +13,6 @@ struct motors
   uint8_t motorDirectionPin;
   float diameter;
   volatile uint16_t rotations=0;
-  volatile byte flag = 0;
   uint32_t lastProcessTime;
   uint16_t actualSpeed;
   uint16_t targetSpeed;
@@ -26,20 +25,20 @@ struct motors m[MAX_MOTORS];
 byte _num;
 void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin, float diameter){
 
-	EICRB = B10100000;  //enable int 7 and int 6 falling edge
+  EICRB = B10100000;  //enable int 7 and int 6 falling edge
   EIMSK = B11000000;
-	m[num].motorPWMPin = motorPWMPin;
-	m[num].motorDirectionPin = motorDirectionPin;
+  m[num].motorPWMPin = motorPWMPin;
+  m[num].motorDirectionPin = motorDirectionPin;
 
  if(m[num].motorPWMPin==6)
-	{
-		m[num].motorControl.init(1,2);
-	}
+  {
+    m[num].motorControl.init(1,2);
+  }
 
-	else if(m[num].motorPWMPin==7)
-	{
-		m[num].motorControl.init(1,3);
-	}
+  else if(m[num].motorPWMPin==7)
+  {
+    m[num].motorControl.init(1,3);
+  }
 
   // else if(_motorPWMPin==9)
   // {
@@ -56,14 +55,13 @@ void Motor::setPeriod(byte num, uint16_t period)
 {
  uint16_t numberofticksTime;
  
-  m[num].period = period;
+  m[num].period =period;
   if (m[num].period > 20)
   {
     m[num].period = 20;
   }
   numberofticksTime = m[num].period / (64e-3);
   m[num].motorControl.setPeriod(numberofticksTime);
-  
 
 }
 
@@ -71,11 +69,10 @@ void Motor::setTime(byte num, int percent)
 {
   uint16_t numberofticksTimeD;
   uint16_t percentDuty;
-
   m[num].percent = percent;                          
   percentDuty = (m[num].period*m[num].percent)/100;                   
   numberofticksTimeD = percentDuty/(64e-3); 
- 	m[num].motorControl.setPWM(percent);
+  m[num].motorControl.setPWM(numberofticksTimeD);
 
 }
 
@@ -112,20 +109,19 @@ void Motor::correctSpeed(byte num)
   }
 
   setTime(num,m[num].percent);
-  Transceiver.println((String)m[num].percent);
-  Transceiver.println((String)"-------");
-   
+ // Transceiver.println((String)m[num].percent);
+
 }
 
 void Motor::computeSpeed(byte num)
 {
-	uint32_t temp;
-	uint32_t timePassed;
-	temp = m[num].rotations;
-	m[num].rotations = 0;
-	timePassed = millis() - m[num].lastProcessTime;
-	m[num].lastProcessTime = millis();
-	m[num].actualSpeed = temp;
+  uint32_t temp;
+  uint32_t timePassed;
+  temp = m[num].rotations;
+  m[num].rotations = 0;
+  timePassed = millis() - m[num].lastProcessTime;
+  m[num].lastProcessTime = millis();
+  m[num].actualSpeed = temp;
 }
 
 uint16_t Motor::getSpeed(byte num)
@@ -133,53 +129,12 @@ uint16_t Motor::getSpeed(byte num)
   return m[num].actualSpeed;
 }
 
-
-void Motor::changeDirection(byte input)
-{
-  m[0].flag=0;
-  m[1].flag=0;
- 
-}
-
-void Motor::getDirection()
-{
-    
-    if(m[0].flag==1)
-    {
-      Transceiver.println((String)"I am backward");  
-    }
-
-    if(m[1].flag==1)
-    {
-      Transceiver.println((String)"I am forward");
-    }
-}
-
 ISR(INT6_vect)
 {
-
-  if(m[1].flag==1)
-  {
-    m[0].flag=0;
-  }
-  else
-  {
-    m[0].flag=1;
-
-  }
-    m[0].rotations++;
-
+  m[0].rotations++;
 }
 
 ISR(INT7_vect)
 {
- if(m[0].flag==1)
- {
-  m[1].flag=0;
- } 
-else
-{
-  m[1].flag=1; 
-}
-	m[1].rotations++;
+  m[1].rotations++;
 } 
