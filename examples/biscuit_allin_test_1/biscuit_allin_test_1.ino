@@ -22,7 +22,7 @@ void loop() {
 
 }
 void printADC0Reading(){
-  Serial.println(rADC.getReading(0));
+ Transceiver.println(rADC.getReading(0));
 }
 void technicaldept(){
   
