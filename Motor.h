@@ -19,6 +19,7 @@ class Motor
     void correctSpeed(byte num);
     void computeSpeed(byte num); 
     void getDirection();
+    void changeDirection(byte num, byte dir);
   private:
   	uint8_t _motorPWMPin;
  	  uint8_t _motorDirectionPin;

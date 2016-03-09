@@ -29,7 +29,13 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
   EICRB = B10100000;  //enable int 7 and int 6 falling edge
   EIMSK = B11000000;
   m[num].motorPWMPin = motorPWMPin;
-  m[num].motorDirectionPin = motorDirectionPin;
+
+
+  if(motorDirectionPin==42) 
+  {
+    DDRG = B00010000;
+    m[num].motorDirectionPin = DDRG;
+  }
 
  if(m[num].motorPWMPin==6)
   {
@@ -49,6 +55,22 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
   else
   {
     //Serial.println("Not applicable PWM to your desired pin");
+  }
+}
+
+void Motor::changeDirection(byte num, byte dir)
+{
+  if(num==0)
+  {
+    if(dir==1)
+    {
+       PORTG = B00010000; 
+    }
+
+    else if(dir==0)
+    {
+      PORTG = 0x00;
+    }
   }
 }
 
