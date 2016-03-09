@@ -135,12 +135,12 @@ void Motor::getDirection()
 {
   if(m[1].flag==1)
   {
-    Transceiver.println((String)("I am forward"));
+    Transceiver.println((String)("I am backward"));
   }
 
   if(m[0].flag==1)
   {
-    Transceiver.println((String)("I am backward"));
+    Transceiver.println((String)("I am forward"));
   }
 
   
