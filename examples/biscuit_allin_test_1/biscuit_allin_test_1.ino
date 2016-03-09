@@ -7,11 +7,13 @@
 #include <Wifi.h>
 
 
+
+
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
   rScheduler.initialize();
   rADC.enable(0);
+  Transceiver.start(8576);
   rScheduler.addProcess(technicaldept,16);
   rScheduler.addProcess(printADC0Reading,1000);
   rScheduler.start();
@@ -22,7 +24,7 @@ void loop() {
 
 }
 void printADC0Reading(){
- Transceiver.println(rADC.getReading(0));
+ Transceiver.println((String)rADC.getReading(0));
 }
 void technicaldept(){
   
