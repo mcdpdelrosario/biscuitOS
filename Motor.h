@@ -18,6 +18,8 @@ class Motor
     void setTarget(byte num, uint16_t targetSpeed);
     void correctSpeed(byte num);
     void computeSpeed(byte num);
+    void getDirection(); 
+    void changeDirection(byte input); 
   private:
   	uint8_t _motorPWMPin;
  	  uint8_t _motorDirectionPin;

@@ -13,6 +13,7 @@ struct motors
   uint8_t motorDirectionPin;
   float diameter;
   volatile uint16_t rotations=0;
+  volatile byte flag = 0;
   uint32_t lastProcessTime;
   uint16_t actualSpeed;
   uint16_t targetSpeed;
@@ -132,12 +133,53 @@ uint16_t Motor::getSpeed(byte num)
   return m[num].actualSpeed;
 }
 
+
+void Motor::changeDirection(byte input)
+{
+  m[0].flag=0;
+  m[1].flag=0;
+ 
+}
+
+void Motor::getDirection()
+{
+    
+    if(m[0].flag==1)
+    {
+      Transceiver.println((String)"I am backward");  
+    }
+
+    if(m[1].flag==1)
+    {
+      Transceiver.println((String)"I am forward");
+    }
+}
+
 ISR(INT6_vect)
 {
-	m[0].rotations++;
+
+  if(m[1].flag==1)
+  {
+    m[0].flag=0;
+  }
+  else
+  {
+    m[0].flag=1;
+
+  }
+    m[0].rotations++;
+
 }
 
 ISR(INT7_vect)
 {
+ if(m[0].flag==1)
+ {
+  m[1].flag=0;
+ } 
+else
+{
+  m[1].flag=1; 
+}
 	m[1].rotations++;
 } 
