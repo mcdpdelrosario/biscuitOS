@@ -110,7 +110,7 @@ void Motor::correctSpeed(byte num)
 
  
   computeSpeed(num);
-  uint8_t proportionalConstant = 5;
+  uint8_t proportionalConstant = 3;
 
   if(m[num].actualSpeed>m[num].targetSpeed)
   {
@@ -132,7 +132,7 @@ void Motor::correctSpeed(byte num)
   }
 
   setTime(num,m[num].percent);
-//   Transceiver.println((String)m[num].percent);
+ Transceiver.println((String)m[num].percent);
 
 }
 
