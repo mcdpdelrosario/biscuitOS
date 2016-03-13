@@ -19,7 +19,9 @@ class Motor
     void correctSpeed(byte num);                                                                      //Function that always runs to reach the target ticks set by the user
     void computeSpeed(byte num);                                                                      //Function that passes the number of rotations from the interrupt to a variable and computes the speed based on the rotations
     void getDirection();                                                                              //Function that prints the direction of the motor
-    void changeDirection(byte num, byte dir);                                                         //Function that sets the direction of the motor based on the users input. 1 means forward, 0 means backward
+    void changeDirection(byte num, byte dir);      
+    void resetFlags();
+                                                       //Function that sets the direction of the motor based on the users input. 1 means forward, 0 means backward
   private:
   	uint8_t _motorPWMPin;
  	  uint8_t _motorDirectionPin;
