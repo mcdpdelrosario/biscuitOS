@@ -17,9 +17,9 @@ struct motors
   uint32_t lastProcessTime;
   uint16_t actualSpeed;
   uint16_t targetSpeed;
-  int16_t proportionalFormula;
   int percent;
   uint16_t period;
+  int16_t proportionalFormula;
   PWMSoftware motorControl;
 };
 struct motors m[MAX_MOTORS];
@@ -77,8 +77,7 @@ void Motor::changeDirection(byte num, byte dir)
     }
   }
 
-  
-
+ 
 }
 
 void Motor::setPeriod(byte num, uint16_t period)            //User sets the total period of the motor 
@@ -99,14 +98,11 @@ void Motor::setTime(byte num, int percent)                //Acts as the setDuty 
 {
   uint16_t numberofticksTimeD;
   uint16_t percentDuty;
-  m[num].percent = percent;      
-
-
-  percentDuty = ((m[num].period*percent))/1000;                                                        //Percent to be converted again to the number of ticks                
+  m[num].percent = percent;                               //Percent to be converted again to the number of ticks
+  percentDuty = (m[num].period*m[num].percent)/100;                   
   numberofticksTimeD = percentDuty/(64e-3); 
   m[num].motorControl.setPWM(numberofticksTimeD);
- // Transceiver.println((String)numberofticksTimeD);
- // Transceiver.println((String)"==================");
+
 }
 
 void Motor::setTarget(byte num, uint16_t targetSpeed)     //function used by the user to set the target ticks
@@ -120,39 +116,31 @@ void Motor::correctSpeed(byte num)
                                                         //Application of proportional controller to correct the speed and reach the target ticks of the user
  
   computeSpeed(num);                                    //Printing the actual speed function
-  uint8_t proportionalAdd = 5;
-  
+  uint8_t proportionalConstant = 5;
 
+  m[num].proportionalFormula = m[num].targetSpeed - m[num].actualSpeed;
 
-   
-
-    if(m[num].targetSpeed>m[num].actualSpeed)
-    {
-      m[num].percent = m[num].percent + ((m[num].targetSpeed - m[num].actualSpeed)*100);
-
-      if(m[num].percent>=990)
-      {
-        m[num].percent = 990;
-      }
-
-
-    }
-    else if(m[num].targetSpeed<m[num].actualSpeed)
-    {
-      m[num].percent =  m[num].percent - ((m[num].targetSpeed - m[num].actualSpeed)*100); 
-
-      if(m[num].percent<=100)
-      {
-
-        m[num].percent = 100;
-      }
-    }
+  if(m[num].actualSpeed>m[num].targetSpeed)
+  {
+     m[num].percent = m[num].percent + m[num].proportionalFormula - proportionalConstant; 
     
-    
+    if(m[num].percent<=3)
+    {
+      m[num].percent = 3;
+    }
+  }
 
-      Transceiver.println((String)m[num].percent);  
-       Transceiver.println((String)"------------------------------");   
-    setTime(num,m[num].percent);
+  else if(m[num].actualSpeed<m[num].targetSpeed)
+  {
+    m[num].percent = m[num].percent + m[num].proportionalFormula + proportionalConstant;
+    if(m[num].percent>=99)
+    {
+      m[num].percent = 99;
+    }
+  }
+
+  setTime(num,m[num].percent);
+ // Transceiver.println((String)m[num].percent);
 
 }
 
@@ -184,8 +172,6 @@ void Motor::getDirection()                            // FUnction that determine
   {
     Transceiver.println((String)("I am forward"));
   }
-
-  
         
 }
 
