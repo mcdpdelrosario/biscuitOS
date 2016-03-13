@@ -62,8 +62,6 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
 void Motor::changeDirection(byte num, byte dir)
 {
 
-  m[0].flag=0;                                                  //reset the flag used by the interrupt for changeDirection
-  m[1].flag=0;
   if(num==0)
   {
     if(dir==1)
@@ -78,6 +76,12 @@ void Motor::changeDirection(byte num, byte dir)
   }
 
  
+}
+
+void Motor::resetFlags()
+{
+	  m[0].flag=0;                                                  //reset the flag used by the interrupt for changeDirection
+      m[1].flag=0;
 }
 
 void Motor::setPeriod(byte num, uint16_t period)            //User sets the total period of the motor 
@@ -99,7 +103,7 @@ void Motor::setTime(byte num, int percent)                //Acts as the setDuty 
   uint16_t numberofticksTimeD;
   uint16_t percentDuty;
   m[num].percent = percent;                               //Percent to be converted again to the number of ticks
-  percentDuty = (m[num].period*m[num].percent)/100;                   
+  percentDuty = (m[num].period*m[num].percent)/1000;                   
   numberofticksTimeD = percentDuty/(64e-3); 
   m[num].motorControl.setPWM(numberofticksTimeD);
 
@@ -116,26 +120,26 @@ void Motor::correctSpeed(byte num)
                                                         //Application of proportional controller to correct the speed and reach the target ticks of the user
  
   computeSpeed(num);                                    //Printing the actual speed function
-  uint8_t proportionalConstant = 5;
+  uint8_t proportionalConstant = 50;
 
-  m[num].proportionalFormula = m[num].targetSpeed - m[num].actualSpeed;
+  m[num].proportionalFormula = (m[num].targetSpeed - m[num].actualSpeed)*100;
 
   if(m[num].actualSpeed>m[num].targetSpeed)
   {
      m[num].percent = m[num].percent + m[num].proportionalFormula - proportionalConstant; 
     
-    if(m[num].percent<=3)
+    if(m[num].percent<=50)
     {
-      m[num].percent = 3;
+      m[num].percent = 50;
     }
   }
 
   else if(m[num].actualSpeed<m[num].targetSpeed)
   {
     m[num].percent = m[num].percent + m[num].proportionalFormula + proportionalConstant;
-    if(m[num].percent>=99)
+    if(m[num].percent>=990)
     {
-      m[num].percent = 99;
+      m[num].percent = 990;
     }
   }
 
