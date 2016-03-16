@@ -14,7 +14,7 @@ PWMSoftware::PWMSoftware(){
 void PWMSoftware::init(uint8_t timerNo, uint8_t ocrLetter){
 _timerNo = timerNo;
 _ocrLetter = ocrLetter;
-tempTCCRnB = 0x1D; 
+tempTCCRnB = 0x1A;
 if (_timerNo == 3) {
 
 _TCCRnA = &TCCR3A;
