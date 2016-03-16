@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "UV1.h"
+#include "UARTv1.h"
 #include <avr/interrupt.h>
 #define RQ 0
 #define SQ 1
@@ -12,16 +12,16 @@ struct DataQ DataQ[2];
 void Enqueue(uint8_t queue_number, char data);
 char Dequeue(uint8_t queue_number);
 uint8_t getLength(String str);
-void UV1::start(uint16_t baudRate){
+void UARTv1::start(uint16_t baudRate){
     UCSR0A = 0x02;
     UCSR0C = 0x06;
     UBRR0 = 207;
     UCSR0B = 0x98;
 }
-uint8_t UV1::peek(){
+uint8_t UARTv1::peek(){
   return DataQ[RQ].tail;
 }
-void UV1::print(String data){
+void UARTv1::print(String data){
   uint8_t temp;
   temp = getLength(data);
   for(uint8_t i=0;i<temp;i++){
@@ -29,7 +29,7 @@ void UV1::print(String data){
   }
   UCSR0B |= 0x20;
 }
-void UV1::println(String data){
+void UARTv1::println(String data){
   uint8_t temp;
   temp = getLength(data);
   for(uint8_t i=0;i<temp;i++){
@@ -38,7 +38,7 @@ void UV1::println(String data){
   Enqueue(SQ, '\n');
   UCSR0B |= 0x20;
 }
-char UV1::receive(){
+char UARTv1::receive(){
   return Dequeue(RQ);
 }
 uint8_t getLength(String str){

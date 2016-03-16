@@ -1,9 +1,9 @@
-#ifndef UV1_h
-#define UV1_h
+#ifndef UARTv1_h
+#define UARTv1_h
 
 #include "Arduino.h"
 
-class UV1
+class UARTv1
 {
   public:
 	void start(uint16_t);
@@ -13,5 +13,5 @@ class UV1
 	uint8_t peek();
   private:
 };
-static UV1 Transceiver;
+static UARTv1 Transceiver;
 #endif
