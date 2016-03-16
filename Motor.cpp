@@ -23,12 +23,15 @@ struct motors
   PWMSoftware motorControl;
 };
 struct motors m[MAX_MOTORS];
-
+uint8_t a;
+uint8_t b;
+uint8_t temp;
 byte _num;
 void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin, float diameter){
 
-  EICRB = B10100000;                                              //ena ble int 7 and int 6 falling edge
-  EIMSK = B11000000;  
+  EICRA = B10100000;
+  EICRB = B10010000;                                              //ena ble int 7 and int 6 falling edge
+  EIMSK = B11001100;  
   m[num].motorPWMPin = motorPWMPin;                               //passed the value from the user to the variable struct motorPWMPin
 
 
@@ -36,6 +39,12 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
   {
     DDRG = B00010000;                                              //assembly code setting the pin 42(Direction Pin) as output
     m[num].motorDirectionPin = DDRG;
+  }
+
+  else if(motorDirectionPin==43)
+  {
+  	DDRE = B00000100;
+  	m[num].motorDirectionPin = DDRE;
   }
 
  if(m[num].motorPWMPin==6)
@@ -57,6 +66,8 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
   {
     //Serial.println("Not applicable PWM to your desired pin");
   }
+
+  DDRE &= B10111111;
 }
 
 void Motor::changeDirection(byte num, byte dir)
@@ -67,6 +78,7 @@ void Motor::changeDirection(byte num, byte dir)
     if(dir==1)
     {
        PORTG = B00010000;                                     //Assembly code for digitalWrite of a pin, setting 1 as high and 0 as low
+      
     }
 
     else if(dir==0)
@@ -75,6 +87,19 @@ void Motor::changeDirection(byte num, byte dir)
     }
   }
 
+  else if(num==2)
+  	{
+  		if(dir==1)
+  		{
+  			PORTE= B00000100;
+  		}
+
+  		else if(dir==0)
+  		{
+  			PORTE=0x00;
+  		}
+  	}
+
  
 }
 
@@ -82,6 +107,8 @@ void Motor::resetFlags()
 {
 	  m[0].flag=0;                                                  //reset the flag used by the interrupt for changeDirection
       m[1].flag=0;
+      m[2].flag=0;                                                  //reset the flag used by the interrupt for changeDirection
+      m[3].flag=0;
 }
 
 void Motor::setPeriod(byte num, uint16_t period)            //User sets the total period of the motor 
@@ -167,18 +194,62 @@ uint16_t Motor::getSpeed(byte num)                    //Function that returns th
 
 void Motor::getDirection()                            // FUnction that determines the direction of the motor
 {
-  if(m[1].flag==1)
+  if(m[1].flag==1 || m[3].flag==1)
   {
     Transceiver.println((String)("I am backward"));
   }
 
-  if(m[0].flag==1)
+  if(m[0].flag==1 || m[2].flag==1)
   {
     Transceiver.println((String)("I am forward"));
   }
+
+
         
 }
 
+uint8_t Motor::getConda()
+{
+	temp |= B10111111; //panlinis
+	if(temp==0xFF)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+uint8_t Motor::getCondb()
+{
+	return b;
+}
+
+ISR(INT2_vect)										//19
+{
+	if(m[3].flag==1)
+  {
+    m[2].flag=0;
+  }
+  else
+  {
+    m[2].flag=1;  
+  }
+  
+  m[2].rotations++;
+}
+
+ISR(INT3_vect)
+{
+	if(m[2].flag==1)
+  	{
+    	m[3].flag=0;
+  	}
+  	else
+  	{
+    	m[3].flag=1;  
+  	}
+  
+  	m[3].rotations++;
+}
 
 ISR(INT6_vect)                                       //Interrupts used. Once it hits int6 before int 7, it means forward. Then the number of rotations will just
                                                      //increment every falling edge.
@@ -193,19 +264,24 @@ ISR(INT6_vect)                                       //Interrupts used. Once it 
   }
   
   m[0].rotations++;
+
 }
 
 ISR(INT7_vect)                                      //Same with interrupt 6 but if it hits first before interrupt 6, means the motor is in backward direction. 
 {
-  if(m[0].flag==1)            
-  {
-    m[1].flag=0;
-  }
-  else
-  {
-     m[1].flag=1;   
-  }
+
+//temp = digitalRead(44);
+ temp = PINE;	
+//b = digitalRead(45);
+  // if(m[0].flag==1)            
+  // {
+  //   m[1].flag=0;
+  // }
+  // else
+  // {
+  //    m[1].flag=1;   
+  // }
  
-  m[1].rotations++;
+  // m[1].rotations++;
 } 
 

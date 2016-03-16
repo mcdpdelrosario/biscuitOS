@@ -21,6 +21,8 @@ class Motor
     void getDirection();                                                                              //Function that prints the direction of the motor
     void changeDirection(byte num, byte dir);      
     void resetFlags();
+    uint8_t getConda(); 
+    uint8_t getCondb();
                                                        //Function that sets the direction of the motor based on the users input. 1 means forward, 0 means backward
   private:
   	uint8_t _motorPWMPin;
