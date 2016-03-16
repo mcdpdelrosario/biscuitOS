@@ -17,28 +17,28 @@ switch(_pin){
 //Timer 3
 case 3:
 	p.init(3,3);
-	p.setPeriod(312);
+	p.setPeriod(40000);
 	 //Serial.println("JOSHUA POGI 3");
 		break;
 case 2:p.init(3,2);
-		p.setPeriod(312);
+		p.setPeriod(40000);
 	//Serial.println("JOSHUA POGI 2");
 		break;
 case 5:p.init(3,1);
-	p.setPeriod(312);
+	p.setPeriod(40000);
 		// Serial.println("JOSHUA POGI 5");
 		break;
 		//Timer 1
 case 6:p.init(1,3);
-	p.setPeriod(312);
+	p.setPeriod(40000);
 		 // Serial.println("JOSHUA POGI 6");
 		break;
 case 7:p.init(1,2);
-	p.setPeriod(312);
+	p.setPeriod(40000);
  // Serial.println("JOSHUA POGI 7");
 		break;
 case 9:p.init(1,1);
-	p.setPeriod(312);
+	p.setPeriod(40000);
 		 // Serial.println("JOSHUA POGI 9");
 		break;
 default:
@@ -52,7 +52,7 @@ default:
 
 void ServoEnhance::setAngle(uint16_t angle){
 	uint16_t y;
-	y = ((angle*29)/180) + 9;
+	y = ((angle*1800)/180) + 3000;
 	p.setPWM(y);
 }
 

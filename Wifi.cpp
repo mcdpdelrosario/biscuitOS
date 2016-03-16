@@ -5,52 +5,63 @@
 // #include <UARTv1/UARTv1.h>
 #include <avr/interrupt.h>
 
-void control(char Command) {
+// void control(char Command) {
 
-  switch (Command) {
-    case 'X':
-    	digitalWrite(42,LOW);
-    	digitalWrite(43,LOW);
-    	//motorLeft.setPWM(10);
-    	//motorRight.setPWM(10);
-        Transceiver.print("S\n");
-      break;
-    case 'W':
-    	digitalWrite(42,LOW);
-    	digitalWrite(43,LOW);
-    	//motorLeft.setPWM(300);
-    	//motorRight.setPWM(300);
-        Transceiver.print("W\n");
-      break;
-    case 'D':
-    	digitalWrite(42,LOW);
-    	digitalWrite(43,LOW);
-    	//motorLeft.setPWM(150);
-    	//motorRight.setPWM(300);
-        Transceiver.print("D\n");
-      break;
-    case 'A':
-    	digitalWrite(42,LOW);
-    	digitalWrite(43,LOW);
-    	//motorLeft.setPWM(300);
-    	//motorRight.setPWM(150);
-        Transceiver.print("A\n");
-      break;
+//   switch (Command) {
+//     case 'X':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(10);
+//     	//motorRight.setPWM(10);
+//         Transceiver.print("S\n");
+//       break;
+//     case 'W':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(300);
+//     	//motorRight.setPWM(300);
+//         Transceiver.print("W\n");
+//       break;
+//     case 'D':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(150);
+//     	//motorRight.setPWM(300);
+//         Transceiver.print("D\n");
+//       break;
+//     case 'A':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(300);
+//     	//motorRight.setPWM(150);
+//         Transceiver.print("A\n");
+//       break;
 
-    case 'S':
-    	//digitalWrite(42,)
-    	digitalWrite(42,HIGH);
-    	digitalWrite(43,HIGH);
-    	//motorLeft.setPWM(300);
-    	//motorRight.setPWM(300);
-        Transceiver.print("S\n");
-      break;
-    case 'F':
-        Transceiver.print("F\n");
-      break;
-    default:
-      break;
-  }
+//     case 'S':
+//     	//digitalWrite(42,)
+//     	digitalWrite(42,HIGH);
+//     	digitalWrite(43,HIGH);
+//     	//motorLeft.setPWM(300);
+//     	//motorRight.setPWM(300);
+//         Transceiver.print("S\n");
+//       break;
+//     case 'F':
+//         Transceiver.print("F\n");
+//       break;
+//     default:
+//       break;
+//   }
+// }
+
+typedef void (* FunctionPointer_t) (char);
+struct pointme {
+   FunctionPointer_t functions;
+};
+struct pointme p[10];
+
+void Wifi::commands(void (*functionCallBack)(char))
+{
+   p[0].functions = functionCallBack;
 }
 
 void sendData(String command, const int timeout){
@@ -93,7 +104,8 @@ void Wifi::receive(){
     }
     else{
 //      Transceiver.send((String)dataneed);
-    control(letter);
+    // control(letter);
+      p[0].functions(letter);
     }
   }
   else if(letter == '~'){
