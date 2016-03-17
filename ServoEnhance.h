@@ -9,7 +9,7 @@ class ServoEnhance
 public:
 ServoEnhance();
 void attach(uint8_t pin);
-void setAngle(uint16_t angle);
+void setAngle(uint32_t angle);
 void detach(uint8_t pin);
 PWMSoftware p;
 private:

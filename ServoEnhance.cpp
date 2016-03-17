@@ -50,10 +50,11 @@ default:
 
 }
 
-void ServoEnhance::setAngle(uint16_t angle){
-	uint16_t y;
-	y = ((angle*1800)/180) + 3000;
-	p.setPWM(y);
+void ServoEnhance::setAngle(uint32_t angle){
+	uint32_t y;
+	y = ((angle*380)/18) + 1000;
+Serial.println(y);	
+p.setPWM(y);
 }
 
 

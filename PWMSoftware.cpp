@@ -81,7 +81,7 @@ void PWMSoftware::setPeriod(uint16_t noofTicks){
 *_TCCRnB = tempTCCRnB;
 }
 
-void PWMSoftware::setPWM(uint16_t noofTicks){
+void PWMSoftware::setPWM(uint32_t noofTicks){
 *_OCRnX = noofTicks;
 }
 

@@ -8,8 +8,8 @@ typedef void (* FunctionPointer_t) ();
 FunctionPointer_t _function;
 
 typedef union {
-  uint16_t varint;
-  uint8_t varbyte[2];
+  uint32_t varint;
+  uint8_t varbyte[4];
 } combo;
 
 struct PCB {
@@ -43,7 +43,7 @@ void biscuitos::initialize(){
 }
 
 void biscuitos::addProcess(void (*pointF)(),uint16_t nextmS){
-	uint16_t period;
+	uint32_t period;
 	period = nextmS * 15.625;
 	PCB[_processNum].ID = _processNum;
 	PCB[_processNum].state = stop;
@@ -113,8 +113,8 @@ void runReadyProcesses(){
 }
 	
 void dequeueProcess(){
-	uint16_t tempTime;
-	uint16_t tempTimeSub;
+	uint32_t tempTime;
+	uint32_t tempTimeSub;
 	//printAR();
 	tempTime = TCNT2 + cLimit + PQ[0].rTime.varint;
 	tempTimeSub = TCNT2 + cLimit;
