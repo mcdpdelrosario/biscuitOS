@@ -18,7 +18,7 @@ class Motor
     void setTarget(byte num, uint16_t targetSpeed);                                                   //Used by the user to set the target ticks the user wants the motor to reach
     void correctSpeed(byte num);                                                                      //Function that always runs to reach the target ticks set by the user
     void computeSpeed(byte num);                                                                      //Function that passes the number of rotations from the interrupt to a variable and computes the speed based on the rotations
-    void getDirection();                                                                              //Function that prints the direction of the motor
+    void getDirection(byte num);                                                                              //Function that prints the direction of the motor
     void changeDirection(byte num, byte dir);      
     void resetFlags();
     uint8_t getConda(); 
