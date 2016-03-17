@@ -107,10 +107,8 @@ void Motor::changeDirection(byte num, byte dir)
 
 void Motor::resetFlags()
 {
-	  m[0].flag=0;                                                  //reset the flag used by the interrupt for changeDirection
-      m[1].flag=0;
-      m[2].flag=0;                                                  //reset the flag used by the interrupt for changeDirection
-      m[3].flag=0;
+	 m[0].rotations=0;
+  m[1].rotations=0;
 }
 
 void Motor::setPeriod(byte num, uint16_t period)            //User sets the total period of the motor 
@@ -252,6 +250,7 @@ uint8_t Motor::getCondb()
   return 0;
 
 }
+
 
 ISR(INT2_vect)										//19
 {

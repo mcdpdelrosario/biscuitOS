@@ -20,7 +20,7 @@ class Motor
     void computeSpeed(byte num);                                                                      //Function that passes the number of rotations from the interrupt to a variable and computes the speed based on the rotations
     void getDirection(byte num);                                                                              //Function that prints the direction of the motor
     void changeDirection(byte num, byte dir);      
-    void resetFlags();
+    void resetFlags() ;
     uint8_t getConda(); 
     uint8_t getCondb();
                                                        //Function that sets the direction of the motor based on the users input. 1 means forward, 0 means backward
