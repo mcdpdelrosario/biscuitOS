@@ -26,10 +26,11 @@ struct motors m[MAX_MOTORS];
 uint8_t a;
 uint8_t b;
 uint8_t temp;
+uint8_t temp1;
 byte _num;
 void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin, float diameter){
 
-  EICRA = B10100000;
+  EICRA = B10010000;
   EICRB = B10010000;                                              //ena ble int 7 and int 6 falling edge
   EIMSK = B11001100;  
   m[num].motorPWMPin = motorPWMPin;                               //passed the value from the user to the variable struct motorPWMPin
@@ -68,6 +69,7 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
   }
 
   DDRE &= B10111111;
+  DDRD &= B11111011;
 }
 
 void Motor::changeDirection(byte num, byte dir)
@@ -147,7 +149,7 @@ void Motor::correctSpeed(byte num)
                                                         //Application of proportional controller to correct the speed and reach the target ticks of the user
  
   computeSpeed(num);                                    //Printing the actual speed function
-  uint8_t proportionalConstant = 50;
+  uint8_t proportionalConstant = 10;
 
   m[num].proportionalFormula = (m[num].targetSpeed - m[num].actualSpeed)*100;
 
@@ -155,9 +157,9 @@ void Motor::correctSpeed(byte num)
   {
      m[num].percent = m[num].percent + m[num].proportionalFormula - proportionalConstant; 
     
-    if(m[num].percent<=50)
+    if(m[num].percent<=proportionalConstant)
     {
-      m[num].percent = 50;
+      m[num].percent = proportionalConstant;
     }
   }
 
@@ -192,20 +194,42 @@ uint16_t Motor::getSpeed(byte num)                    //Function that returns th
 }
 
 
-void Motor::getDirection()                            // FUnction that determines the direction of the motor
+void Motor::getDirection(byte num)                            // FUnction that determines the direction of the motor
 {
   a = getConda();
-  if(a==1)
-  {
-    Transceiver.println((String)"I am backward");
-  }
-  else if(a==0)
-  {
+  b = getCondb();
 
-  Transceiver.println((String)"I am forward");
- 
-  }
-        
+    
+    if(num==0)
+    {
+        if(a==1)
+        {
+          Transceiver.println((String)"I am backward");
+        }
+        else if(a==0)
+        {
+
+          Transceiver.println((String)"I am forward");
+   
+        } 
+    }
+
+    else if(num==1)
+    {
+        if(b==1)
+      {
+        Transceiver.println((String)"I am backward");
+      }
+      else if(b==0)
+      {
+
+      Transceiver.println((String)"I am forward");
+     
+      } 
+    }
+    
+  
+       
 }
 
 uint8_t Motor::getConda()
@@ -220,35 +244,24 @@ uint8_t Motor::getConda()
 
 uint8_t Motor::getCondb()
 {
-	return b;
+  temp1 |= B11111011; //panlinis
+  if(temp1==0xFF)
+  {
+    return 1;
+  }
+  return 0;
+
 }
 
 ISR(INT2_vect)										//19
 {
-	if(m[3].flag==1)
-  {
-    m[2].flag=0;
-  }
-  else
-  {
-    m[2].flag=1;  
-  }
   
-  m[2].rotations++;
+  m[1].rotations++;
 }
 
 ISR(INT3_vect)
 {
-	if(m[2].flag==1)
-  	{
-    	m[3].flag=0;
-  	}
-  	else
-  	{
-    	m[3].flag=1;  
-  	}
-  
-  	m[3].rotations++;
+	temp1 = PIND;
 }
 
 ISR(INT6_vect)                                       //Interrupts used. Once it hits int6 before int 7, it means forward. Then the number of rotations will just
