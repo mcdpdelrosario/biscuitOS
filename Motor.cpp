@@ -87,7 +87,7 @@ void Motor::changeDirection(byte num, byte dir)
     }
   }
 
-  else if(num==2)
+  else if(num==1)
   	{
   		if(dir==1)
   		{
@@ -194,17 +194,17 @@ uint16_t Motor::getSpeed(byte num)                    //Function that returns th
 
 void Motor::getDirection()                            // FUnction that determines the direction of the motor
 {
-  if(m[1].flag==1 || m[3].flag==1)
+  a = getConda();
+  if(a==1)
   {
-    Transceiver.println((String)("I am backward"));
+    Transceiver.println((String)"I am backward");
   }
-
-  if(m[0].flag==1 || m[2].flag==1)
+  else if(a==0)
   {
-    Transceiver.println((String)("I am forward"));
+
+  Transceiver.println((String)"I am forward");
+ 
   }
-
-
         
 }
 
@@ -254,14 +254,6 @@ ISR(INT3_vect)
 ISR(INT6_vect)                                       //Interrupts used. Once it hits int6 before int 7, it means forward. Then the number of rotations will just
                                                      //increment every falling edge.
 {
-  if(m[1].flag==1)
-  {
-    m[0].flag=0;
-  }
-  else
-  {
-    m[0].flag=1;  
-  }
   
   m[0].rotations++;
 
@@ -270,18 +262,6 @@ ISR(INT6_vect)                                       //Interrupts used. Once it 
 ISR(INT7_vect)                                      //Same with interrupt 6 but if it hits first before interrupt 6, means the motor is in backward direction. 
 {
 
-//temp = digitalRead(44);
  temp = PINE;	
-//b = digitalRead(45);
-  // if(m[0].flag==1)            
-  // {
-  //   m[1].flag=0;
-  // }
-  // else
-  // {
-  //    m[1].flag=1;   
-  // }
- 
-  // m[1].rotations++;
 } 
 
