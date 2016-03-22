@@ -79,7 +79,7 @@ void sendData(String command, const int timeout){
 //    Transceiver.print(response);
 }
 
-void Wifi::initialize(uint16_t baud, String apName, String pass){
+void Wifi::initialize(uint32_t baud, String apName, String pass){
   Transceiver.start(baud);
   sendData("AT+CWJAP=\""+apName+"\",\""+pass+"\"\r\n",8000);  
 }
