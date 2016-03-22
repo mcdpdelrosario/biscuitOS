@@ -13,11 +13,13 @@ void Enqueue(uint8_t queue_number, char data);
 char Dequeue(uint8_t queue_number);
 uint8_t getLength(String str);
 void UARTv1::start(uint32_t baudRate){
+
     UCSR0A = 0x02;
     UCSR0C = 0x06;
-    uint32_t baud  = (((16e6)/(8*baudRate)))-1;
-    UBRR0 = baud;
     UCSR0B = 0x98;
+    uint32_t baud = (((16e6)/(8*baudRate)))-1;
+    UBRR0 = baud;
+    
 }
 uint8_t UARTv1::peek(){
   return DataQ[RQ].tail;
