@@ -6,7 +6,7 @@
 class UARTv1
 {
   public:
-	void start(uint16_t);
+	void start(uint32_t);
     void print(String data);
     void println(String data);
 	char receive(); //for debugging
