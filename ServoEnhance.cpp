@@ -29,11 +29,11 @@ case 5:p.init(3,1);
 		// Serial.println("JOSHUA POGI 5");
 		break;
 		//Timer 1
-case 6:p.init(1,3);
+case 7:p.init(1,3);
 	p.setPeriod(40000);
 		 // Serial.println("JOSHUA POGI 6");
 		break;
-case 7:p.init(1,2);
+case 6:p.init(1,2);
 	p.setPeriod(40000);
  // Serial.println("JOSHUA POGI 7");
 		break;
@@ -52,16 +52,40 @@ default:
 
 void ServoEnhance::setAngle(uint32_t angle){
 	uint32_t y;
-	y = ((angle*380)/18) + 1400;	
-	p.setPWM(y);
+	y = ((angle*380)/18) + 1000;
+//Serial.println(y);	
+p.setPWM(y);
 }
 
 
 
-void ServoEnhance::detach(uint8_t dpin){
+void ServoEnhance::detach(uint8_t pin){
 	
+	_pin = pin;
+switch(_pin){
+	case 3:
+			p.detachPin(3,3);
+		break;
+	case 2:
+			p.detachPin(3,2);
+		break;
+	case 5:
+			p.detachPin(3,1);
+		break;
+	case 7:
+			p.detachPin(1,3);
+	break;
+	case 6:
+			p.detachPin(1,2);
+		break;
+	case 9:
+			p.detachPin(1,1);
+		break;
 	
-	
+	default:
+	break;
+}
+	 
 	
 	
 }
