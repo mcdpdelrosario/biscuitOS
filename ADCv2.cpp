@@ -1,8 +1,10 @@
 #include "Arduino.h"
 #include "ADCv2.h"
+#include "biscuitos.h"
 #include <avr/interrupt.h>
 #define disabledADC 0;
 #define enabledADC 1;
+
 typedef union{
 	uint16_t mixVar;
 	uint8_t byteVar[2];
