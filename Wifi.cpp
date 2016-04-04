@@ -2,60 +2,14 @@
 #include "Wifi.h"
 #include "UARTv1.h"
 #include "PWMSoftware.h"
-// #include <UARTv1/UARTv1.h>
 #include <avr/interrupt.h>
 
-// void control(char Command) {
-
-//   switch (Command) {
-//     case 'X':
-//     	digitalWrite(42,LOW);
-//     	digitalWrite(43,LOW);
-//     	//motorLeft.setPWM(10);
-//     	//motorRight.setPWM(10);
-//         Transceiver.print("S\n");
-//       break;
-//     case 'W':
-//     	digitalWrite(42,LOW);
-//     	digitalWrite(43,LOW);
-//     	//motorLeft.setPWM(300);
-//     	//motorRight.setPWM(300);
-//         Transceiver.print("W\n");
-//       break;
-//     case 'D':
-//     	digitalWrite(42,LOW);
-//     	digitalWrite(43,LOW);
-//     	//motorLeft.setPWM(150);
-//     	//motorRight.setPWM(300);
-//         Transceiver.print("D\n");
-//       break;
-//     case 'A':
-//     	digitalWrite(42,LOW);
-//     	digitalWrite(43,LOW);
-//     	//motorLeft.setPWM(300);
-//     	//motorRight.setPWM(150);
-//         Transceiver.print("A\n");
-//       break;
-
-//     case 'S':
-//     	//digitalWrite(42,)
-//     	digitalWrite(42,HIGH);
-//     	digitalWrite(43,HIGH);
-//     	//motorLeft.setPWM(300);
-//     	//motorRight.setPWM(300);
-//         Transceiver.print("S\n");
-//       break;
-//     case 'F':
-//         Transceiver.print("F\n");
-//       break;
-//     default:
-//       break;
-//   }
-// }
 
 typedef void (* FunctionPointer_t) (char);
+typedef void (* FunctionPointer_t2) (uint16_t);
 struct pointme {
    FunctionPointer_t functions;
+   FunctionPointer_t2 functions2;
 };
 struct pointme p[10];
 
@@ -79,16 +33,18 @@ void sendData(String command, const int timeout){
 //    Transceiver.print(response);
 }
 
-void Wifi::initialize(uint32_t baud, String apName, String pass){
-  Transceiver.start(baud);
+char openingTag;
+
+void Wifi::initialize(char openTag, String apName, String pass){
+	openingTag=openTag;
+  sendData("AT+CWMODE=1\r\n",1000);  
   sendData("AT+CWJAP=\""+apName+"\",\""+pass+"\"\r\n",8000);  
 }
 
-void Wifi::listen(String portNumber, String IP){
+void Wifi::listen(String ID, String portNumber, String IP){
   sendData("AT+CIPMUX=1\r\n",1000);
-  sendData("AT+CIPSERVER=1,"+portNumber+"\r\n",2000);
-  sendData("AT+CIPSTA=\""+IP+"\"\r\n",3000);
-  Transceiver.print("Connect Now!\n");
+  sendData("AT+CIPSTART="+ ID +",\"TCP\",\""+ IP +"\","+portNumber+"\r\n",2000);
+  Transceiver.print("Connected!");
 }
 
 boolean statemachine = LOW;
@@ -99,7 +55,7 @@ void Wifi::receive(){
     char letter = Transceiver.receive();
   if(statemachine ==HIGH){
     if(letter == ']'){
-//     Transceiver.send((String)dataneed);
+    // Transceiver.print((String)dataneed);
       statemachine = LOW; 
     }
     else{
@@ -108,7 +64,7 @@ void Wifi::receive(){
       p[0].functions(letter);
     }
   }
-  else if(letter == '~'){
+  else if(letter == openingTag){
     statemachine = HIGH; 
   }
   }

@@ -6,10 +6,10 @@
 class Wifi
 {
   public:
-	void initialize(uint32_t,String,String);
-    void listen(String,String);
+	void initialize(char,String,String);
+    void listen(String,String,String);
     void commands(void (*functionCallBack)(char));
-	void receive(); 
+    void gatherData(void (*functionCallBack)(uint16_t));
 	//void send(); under construction
   private:
   	// char myCommand;
