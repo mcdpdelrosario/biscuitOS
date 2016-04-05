@@ -44,7 +44,7 @@ void UARTv1::println(String data){
 char UARTv1::receive(){
   return Dequeue(RQ);
 }
-uint8_t getLength(String str){
+uint8_t UARTv1::getLength(String str){
   uint8_t num;
   num=0;
   while(str[num]!=0x00){
