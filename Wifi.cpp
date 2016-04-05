@@ -20,14 +20,13 @@ void Wifi::gather(String openingTag,String classifier,uint16_t data){
   String frame;
   String sendString;
 	caller.data=data;
-  uint8_t length;
-  frame=openingTag + classifier + "2" + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)(caller.cdata[0]+caller.cdata[1]);
+  char lengthdata=2;
+  uint8_t datalength;
+  frame=openingTag + classifier + lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)(caller.cdata[0]+caller.cdata[1]);
   // Transceiver.print("AT+CIPSEND=1,");
-  length=Transceiver.getLength(frame);
-  sendString="AT+CIPSEND=1,";
-  sendString+=(String)(length)+"\r\n";
-  // Transceiver.print((String)(length+2)+"\r\n");
-  // Transceiver.print(frame+"\r\n");
+  datalength=Transceiver.getLength(frame);
+  sendString="\r\nAT+CIPSEND=1,";
+  sendString+=(String)(datalength)+"\r\n";
   sendData(sendString,100);
   sendData(frame,100);
   // Transceiver.print(sendString);
@@ -64,7 +63,7 @@ void Wifi::initialize(char openTag, String apName, String pass){
 void Wifi::listen(String ID, String portNumber, String IP){
   sendData("AT+CIPMUX=1\r\n",1000);
   sendData("AT+CIPSTART="+ ID +",\"TCP\",\""+ IP +"\","+portNumber+"\r\n",2000);
-  Transceiver.print("Connected!\r\n");
+  Transceiver.print("Connected!");
 }
 
 boolean statemachine = LOW;
