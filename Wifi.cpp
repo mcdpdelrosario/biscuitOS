@@ -3,15 +3,35 @@
 #include "UARTv1.h"
 #include "PWMSoftware.h"
 #include <avr/interrupt.h>
+typedef union {
+  uint16_t data;
+  char cdata[2];
+}sender;
 
-
+sender caller;
+void sendData(String, const int);
 typedef void (* FunctionPointer_t) (char);
-typedef void (* FunctionPointer_t2) (uint16_t);
 struct pointme {
    FunctionPointer_t functions;
-   FunctionPointer_t2 functions2;
 };
 struct pointme p[10];
+
+void Wifi::gather(String openingTag,String classifier,uint16_t data){
+  String frame;
+  String sendString;
+	caller.data=data;
+  uint8_t length;
+  frame=openingTag + classifier + "2" + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)(caller.cdata[0]+caller.cdata[1]);
+  // Transceiver.print("AT+CIPSEND=1,");
+  length=Transceiver.getLength(frame);
+  sendString="AT+CIPSEND=1,";
+  sendString+=(String)(length)+"\r\n";
+  // Transceiver.print((String)(length+2)+"\r\n");
+  // Transceiver.print(frame+"\r\n");
+  sendData(sendString,100);
+  sendData(frame,100);
+  // Transceiver.print(sendString);
+}
 
 void Wifi::commands(void (*functionCallBack)(char))
 {
@@ -44,7 +64,7 @@ void Wifi::initialize(char openTag, String apName, String pass){
 void Wifi::listen(String ID, String portNumber, String IP){
   sendData("AT+CIPMUX=1\r\n",1000);
   sendData("AT+CIPSTART="+ ID +",\"TCP\",\""+ IP +"\","+portNumber+"\r\n",2000);
-  Transceiver.print("Connected!");
+  Transceiver.print("Connected!\r\n");
 }
 
 boolean statemachine = LOW;
@@ -69,4 +89,3 @@ void Wifi::receive(){
   }
   }
 }
-
