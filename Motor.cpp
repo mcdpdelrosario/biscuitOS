@@ -147,7 +147,7 @@ void Motor::correctSpeed(byte num)
                                                         //Application of proportional controller to correct the speed and reach the target ticks of the user
  
   computeSpeed(num);                                    //Printing the actual speed function
-  uint8_t proportionalConstant = 10;
+  uint8_t proportionalConstant = 5;
 
   m[num].proportionalFormula = (m[num].targetSpeed - m[num].actualSpeed)*100;
 
@@ -171,7 +171,7 @@ void Motor::correctSpeed(byte num)
   }
 
   setTime(num,m[num].percent);
- // Transceiver.println((String)m[num].percent);
+  // Transceiver.println((String)m[num].percent);
 
 }
 
