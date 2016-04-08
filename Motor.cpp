@@ -147,31 +147,54 @@ void Motor::correctSpeed(byte num)
                                                         //Application of proportional controller to correct the speed and reach the target ticks of the user
  
   computeSpeed(num);                                    //Printing the actual speed function
-  uint8_t proportionalConstant = 5;
+  uint8_t proportionalConstant = 100;
 
-  m[num].proportionalFormula = (m[num].targetSpeed - m[num].actualSpeed)*100;
 
-  if(m[num].actualSpeed>m[num].targetSpeed)
-  {
-     m[num].percent = m[num].percent + m[num].proportionalFormula - proportionalConstant; 
+//  if(m[num].actualSpeed>m[num].targetSpeed)
+//  	{
+//  		m[num].percent = m[num].percent-proportionalConstant;	
+
+//  	if(m[num].percent<=proportionalConstant)
+//      	{
+//        		m[num].percent = proportionalConstant;
+//      	}
+ 	  
+//  	 }	 
+
+// else if(m[num].actualSpeed<m[num].targetSpeed)
+// 	{
+// 		m[num].percent = m[num].percent+proportionalConstant;
+
+// 		if(m[num].percent>=990)
+//      {
+//        m[num].percent = 990;
+//      }
+// 	}	 	
+
+
+
+  // m[num].proportionalFormula = (m[num].targetSpeed - m[num].actualSpeed)*100;
+
+  // if(m[num].actualSpeed>m[num].targetSpeed)
+  // {
+  //    m[num].percent = m[num].percent + m[num].proportionalFormula - proportionalConstant; 
     
-    if(m[num].percent<=proportionalConstant)
-    {
-      m[num].percent = proportionalConstant;
-    }
-  }
+  //   if(m[num].percent<=proportionalConstant)
+  //   {
+  //     m[num].percent = proportionalConstant;
+  //   }
+  // }
 
-  else if(m[num].actualSpeed<m[num].targetSpeed)
-  {
-    m[num].percent = m[num].percent + m[num].proportionalFormula + proportionalConstant;
-    if(m[num].percent>=990)
-    {
-      m[num].percent = 990;
-    }
-  }
+  // else if(m[num].actualSpeed<m[num].targetSpeed)
+  // {
+  //   m[num].percent = m[num].percent + m[num].proportionalFormula + proportionalConstant;
+  //   if(m[num].percent>=990)
+  //   {
+  //     m[num].percent = 990;
+  //   }
+  // }
 
-  setTime(num,m[num].percent);
-  // Transceiver.println((String)m[num].percent);
+  setTime(num,100);
 
 }
 
@@ -180,7 +203,7 @@ void Motor::computeSpeed(byte num)                    //Getting the actual ticks
   uint32_t temp;
   uint32_t timePassed;
   temp = m[num].rotations;
-  m[num].rotations = 0;
+  // m[num].rotations = 0;
   timePassed = millis() - m[num].lastProcessTime;
   m[num].lastProcessTime = millis();
   m[num].actualSpeed = temp;
