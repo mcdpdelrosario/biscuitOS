@@ -15,11 +15,21 @@ struct motors
   volatile uint16_t rotations=0;
   volatile byte flag;
   uint32_t lastProcessTime;
-  uint16_t actualSpeed;
-  uint16_t targetSpeed;
   int percent;
   uint16_t period;
   int16_t proportionalFormula;
+
+  // ---------
+
+
+  int16_t presentTime;
+  int16_t pastTime;
+  uint16_t actualTime;
+  uint16_t targetTime;
+  int16_t pastError;
+  int16_t currentError;
+  int16_t sumError;
+
   PWMSoftware motorControl;
 };
 struct motors m[MAX_MOTORS];
@@ -105,11 +115,6 @@ void Motor::changeDirection(byte num, byte dir)
  
 }
 
-void Motor::resetFlags()
-{
-	 m[0].rotations=0;
-  m[1].rotations=0;
-}
 
 void Motor::setPeriod(byte num, uint16_t period)            //User sets the total period of the motor 
 {
@@ -136,83 +141,56 @@ void Motor::setTime(byte num, int percent)                //Acts as the setDuty 
 
 }
 
-void Motor::setTarget(byte num, uint16_t targetSpeed)     //function used by the user to set the target ticks
+void Motor::setTarget(byte num, uint16_t targetTime)     //function used by the user to set the target ticks
 { 
- m[num].targetSpeed = targetSpeed;
-}
-
-
-void Motor::correctSpeed(byte num)
-{
-                                                        //Application of proportional controller to correct the speed and reach the target ticks of the user
  
-  computeSpeed(num);                                    //Printing the actual speed function
-  uint8_t proportionalConstant = 100;
-
-
- if(m[num].actualSpeed>m[num].targetSpeed)
- 	{
- 		m[num].percent = m[num].percent-proportionalConstant;	
-
- 	if(m[num].percent<=proportionalConstant)
-     	{
-       		m[num].percent = proportionalConstant;
-     	}
- 	  
- 	 }	 
-
-else if(m[num].actualSpeed<m[num].targetSpeed)
-	{
-		m[num].percent = m[num].percent+proportionalConstant;
-
-		if(m[num].percent>=990)
-     {
-       m[num].percent = 990;
-     }
-	}	 	
-
-
-
-  m[num].proportionalFormula = (m[num].targetSpeed - m[num].actualSpeed)*100;
-
-  if(m[num].actualSpeed>m[num].targetSpeed)
-  {
-     m[num].percent = m[num].percent + m[num].proportionalFormula - proportionalConstant; 
-    
-    if(m[num].percent<=proportionalConstant)
-    {
-      m[num].percent = proportionalConstant;
-    }
-  }
-
-  else if(m[num].actualSpeed<m[num].targetSpeed)
-  {
-    m[num].percent = m[num].percent + m[num].proportionalFormula + proportionalConstant;
-    if(m[num].percent>=990)
-    {
-      m[num].percent = 990;
-    }
-  }
-
-  setTime(num,100);
-
+ m[num].targetTime = targetTime;
 }
 
-void Motor::computeSpeed(byte num)                    //Getting the actual ticks and passing it to the variable struct actualSpeed.
+
+
+
+
+uint16_t Motor::targetTime(byte num)                    //Function that returns the value of the actual Speed
 {
-  uint32_t temp;
-  uint32_t timePassed;
-  temp = m[num].rotations;
-  // m[num].rotations = 0;
-  timePassed = millis() - m[num].lastProcessTime;
-  m[num].lastProcessTime = millis();
-  m[num].actualSpeed = temp;
+  return m[num].targetTime;
 }
 
-uint16_t Motor::getSpeed(byte num)                    //Function that returns the value of the actual Speed
+uint16_t Motor::presentTime(byte num)                    //Function that returns the value of the actual Speed
 {
-  return m[num].actualSpeed;
+  return m[num].presentTime;
 }
+
+uint16_t Motor::pastTime(byte num)                    //Function that returns the value of the actual Speed
+{
+  return m[num].pastTime;
+}
+
+uint16_t Motor::actualTime(byte num)                    //Function that returns the value of the actual Speed
+{
+  return m[num].actualTime;
+}
+
+int16_t Motor::currentError(byte num)                    //Function that returns the value of the actual Speed
+{
+  return m[num].currentError;
+}
+
+
+int16_t Motor::pastError(byte num)                    //Function that returns the value of the actual Speed
+{
+  return m[num].pastError;
+}
+
+
+int16_t Motor::sumError(byte num)                    //Function that returns the value of the actual Speed
+{
+  return m[num].sumError;
+}
+
+
+
+
 
 
 void Motor::getDirection(byte num)                            // FUnction that determines the direction of the motor
@@ -290,8 +268,12 @@ ISR(INT6_vect)                                       //Interrupts used. Once it 
                                                      //increment every falling edge.
 {
   
-  m[0].rotations++;
-
+ m[0].pastTime = m[0].presentTime;
+ m[0].presentTime = millis();
+ m[0].pastError = m[0].currentError;
+ m[0].actualTime= (m[0].presentTime - m[0].pastTime);
+ m[0].currentError = m[0].targetTime - m[0].actualTime;
+ m[0].sumError += m[0].currentError;
 }
 
 ISR(INT7_vect)                                      //Same with interrupt 6 but if it hits first before interrupt 6, means the motor is in backward direction. 
