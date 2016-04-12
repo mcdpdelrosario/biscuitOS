@@ -6,7 +6,10 @@
 
 #include <avr/interrupt.h>
 #define MAX_MOTORS 2
-
+#define forward 1
+#define backward -1
+#define leftWheel 0
+#define rightWheel 1
 struct motors
 {
   uint8_t motorPWMPin;
@@ -14,6 +17,7 @@ struct motors
   float diameter;
   volatile uint16_t rotations=0;
   volatile byte flag;
+  uint32_t lastProcessTime;
   int percent;
   uint16_t period;
   int16_t proportionalFormula;
@@ -26,19 +30,16 @@ struct motors
   int16_t actualTime;
   int16_t targetTime;
   int16_t pastError;
-  int16_t currentError = 2000;
+  int16_t currentError;
   int16_t sumError;
-  int16_t dError;
-  int16_t pTerm;
-  int16_t iTerm;
-  int16_t dTerm;
-  int16_t PID;
-  int16_t numberofticksTimeD;
-  int16_t percentDuty;
+  int16_t direction;
+  int16_t generalError =0;
+  int16_t generalCounter =0;
 
   PWMSoftware motorControl;
 };
 struct motors m[MAX_MOTORS];
+
 uint8_t a;
 uint8_t b;
 uint8_t temp;
@@ -91,7 +92,7 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
 void Motor::changeDirection(byte num, byte dir)
 {
 
-  if(num==0)
+  if(num==leftWheel)
   {
     if(dir==1)
     {
@@ -105,7 +106,7 @@ void Motor::changeDirection(byte num, byte dir)
     }
   }
 
-  else if(num==1)
+  else if(num==rightWheel)
   	{
   		if(dir==1)
   		{
@@ -138,74 +139,23 @@ void Motor::setPeriod(byte num, uint16_t period)            //User sets the tota
     
 void Motor::setTime(byte num, int percent)                //Acts as the setDuty cycle, input is in percent
 {
- 
+  uint16_t numberofticksTimeD;
+  uint16_t percentDuty;
   m[num].percent = percent;                               //Percent to be converted again to the number of ticks
-  if(m[num].percent<0 && num==0)
-  {
-      Motor::changeDirection(0,0);
-      Transceiver.println(String("Less than 0"));
-  }
+  percentDuty = (m[num].period*m[num].percent)/1000;                   
+  numberofticksTimeD = percentDuty/(64e-3); 
+  m[num].motorControl.setPWM(numberofticksTimeD);
 
-  else if(m[num].percent>0 && num==0)
-  {
-      Motor::changeDirection(0,1);
-      Transceiver.println(String("More than 0"));
-  }
-
-  m[num].percentDuty = (m[num].period*m[num].percent);             
-  m[num].percentDuty = abs(m[num].percentDuty)/1000;
-  m[num].numberofticksTimeD = m[num].percentDuty/(64e-3); 
-  m[num].motorControl.setPWM(m[num].numberofticksTimeD);
-  // Transceiver.println((String)m[num].percent);
-  // Transceiver.println((String)m[num].period);
-  // Transceiver.println((String)m[num].percentDuty);
-  // Transceiver.println((String)m[num].numberofticksTimeD);
-  // Transceiver.println((String)"-------");
-  
-
-  //m[num].motorControl.setPWM(200);
 }
 
-void Motor::setTarget(byte num, int16_t targetTime)     //function used by the user to set the target ticks
+void Motor::setTarget(byte num, uint16_t targetTime)     //function used by the user to set the target ticks
 { 
+ 
  m[num].targetTime = targetTime;
 }
 
 
-void Motor::checkPresentTime(byte num)
-{
-  if(millis()-m[num].presentTime>500)
-  {
-    
-       
-     m[0].presentTime = millis();
 
-     m[0].actualTime= (m[0].presentTime - m[0].pastTime);
-     if(a==1)
-     {
-        m[0].actualTime = -(m[0].actualTime);
-     }
-     m[0].currentError = m[0].targetTime - m[0].actualTime;
-     m[0].sumError += m[0].currentError;
-      }
-}
-
-void Motor::correctSpeed(byte num)
-{
-  
-  uint8_t kP = 2;
-  uint8_t kI = 10;
-  uint8_t kD = 10;
-
-
-
-  m[num].dTerm =  m[num].currentError - m[num].pastError;
-  m[num].PID = -(m[num].sumError/kI) + (m[num].currentError/kP) + (kD/m[num].dTerm);
-
-
-  setTime(0, m[num].PID);
-  // Transceiver.println((String)(m[num].PID));
-}
 
 
 int16_t Motor::targetTime(byte num)                    //Function that returns the value of the actual Speed
@@ -245,10 +195,6 @@ int16_t Motor::sumError(byte num)                    //Function that returns the
   return m[num].sumError;
 }
 
-int16_t Motor::printPID(byte num)                    //Function that returns the value of the actual Speed
-{
-  return m[num].PID;
-}
 
 
 
@@ -256,17 +202,19 @@ int16_t Motor::printPID(byte num)                    //Function that returns the
 
 void Motor::getDirection(byte num)                            // FUnction that determines the direction of the motor
 {
-  a = getConda();
-  b = getCondb();
+  // a = getConda();
+  // b = getCondb();
+
+  int16_t applyDVar = applyDirection(num); 
 
     
-    if(num==0)
+    if(num==leftWheel)
     {
-        if(a==1)
+        if(applyDVar==backward)
         {
           Transceiver.println((String)"I am backward");
         }
-        else if(a==0)
+        else if(applyDVar==forward)
         {
 
           Transceiver.println((String)"I am forward");
@@ -274,13 +222,13 @@ void Motor::getDirection(byte num)                            // FUnction that d
         } 
     }
 
-    else if(num==1)
+    else if(num==rightWheel)
     {
-        if(b==1)
+        if(applyDVar==backward)
       {
         Transceiver.println((String)"I am backward");
       }
-      else if(b==0)
+      else if(applyDVar==forward)
       {
 
       Transceiver.println((String)"I am forward");
@@ -292,27 +240,33 @@ void Motor::getDirection(byte num)                            // FUnction that d
        
 }
 
-uint8_t Motor::getConda()
-{
-	temp |= B10111111; //panlinis
-	if(temp==0xFF)
-	{
-		return 1;
-	}
-	return 0;
-}
+int16_t Motor::applyDirection(byte num)
 
-uint8_t Motor::getCondb()
 {
-  temp1 |= B11111011; //panlinis
-  if(temp1==0xFF)
-  {
-    return 1;
+  if(num==leftWheel){
+    m[0].direction |= B10111111; //panlinis
+    if(m[0].direction==0xFF)
+      {
+        return backward;
+      }
+        return forward;
   }
-  return 0;
+  else if(num==rightWheel){
+    m[1].direction |= B11111011;
+    if(m[1].direction==0xFF){
+      return backward;
+    }
+      return forward;
+          
+  }
 
+}  
+
+
+void Motor::correctSpeed(byte num){
+  m[num].pastError = m[num].presentError;
+  
 }
-
 
 ISR(INT2_vect)										//19
 {
@@ -322,7 +276,7 @@ ISR(INT2_vect)										//19
 
 ISR(INT3_vect)
 {
-	temp1 = PIND;
+	m[1].direction = PIND;
 }
 
 ISR(INT6_vect)                                       //Interrupts used. Once it hits int6 before int 7, it means forward. Then the number of rotations will just
@@ -331,19 +285,17 @@ ISR(INT6_vect)                                       //Interrupts used. Once it 
   
  m[0].pastTime = m[0].presentTime;
  m[0].presentTime = millis();
- m[0].pastError = m[0].currentError;
- m[0].actualTime= (m[0].presentTime - m[0].pastTime);
- if(a==1)
- {
-    m[0].actualTime = -(m[0].actualTime);
- }
- m[0].currentError = m[0].targetTime - m[0].actualTime;
- m[0].sumError += m[0].currentError;
+ m[0].actualTime = (m[0].presentTime - m[0].pastTime);
+ m[0].generalError += m[0].targetTime - m[0].actualTime;
+ m[0].generalCounter++;
+
+// m[0].currentError = m[0].targetTime - m[0].actualTime;
+
+ //m[0].sumError += m[0].currentError;
 }
 
 ISR(INT7_vect)                                      //Same with interrupt 6 but if it hits first before interrupt 6, means the motor is in backward direction. 
 {
-
- temp = PINE;	
+m[0].direction = PINE;	
 } 
 
