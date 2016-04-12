@@ -27,12 +27,16 @@ class Motor
     int16_t pastError(byte num);
     int16_t currentError(byte num);
     int16_t sumError(byte num);
-    int16_t applyDirection(byte num);
+    
+    void correctSpeed(byte num);
+    void checkError(byte num);
+
                                                        //Function that sets the direction of the motor based on the users input. 1 means forward, 0 means backward
   private:
   	uint8_t _motorPWMPin;
  	uint8_t _motorDirectionPin;
   	uint16_t _targetspeedTime;
+    int16_t applyDirection(byte num);
   
   
 
