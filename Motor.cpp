@@ -10,6 +10,7 @@
 #define backward -1
 #define leftWheel 0
 #define rightWheel 1
+
 struct motors
 {
   uint8_t motorPWMPin;
@@ -25,13 +26,23 @@ struct motors
   // ---------
 
 
+  // int16_t presentTime;
+  // int16_t pastTime;
+  // int16_t actualTime;
+  // int16_t targetTime;
+  // int16_t pastError;
+  // int16_t currentError;
+  // int16_t sumError =1000;
+  // int16_t direction;
+  // int16_t generalError =0;
+  // int16_t generalCounter =0;
   int16_t presentTime;
   int16_t pastTime;
   int16_t actualTime;
   int16_t targetTime;
   int16_t pastError;
   int16_t currentError;
-  int16_t sumError;
+  int16_t sumError =1000;
   int16_t direction;
   int16_t generalError =0;
   int16_t generalCounter =0;
@@ -151,7 +162,7 @@ void Motor::setTime(byte num, int percent)                //Acts as the setDuty 
 void Motor::setTarget(byte num, uint16_t targetTime)     //function used by the user to set the target ticks
 { 
  
- m[num].targetTime = targetTime;
+ m[num].targetTime = (10000/targetTime);
 }
 
 
@@ -240,8 +251,8 @@ void Motor::getDirection(byte num)                            // FUnction that d
        
 }
 
-int16_t Motor::applyDirection(byte num)
 
+int16_t Motor::applyDirection(byte num)
 {
   if(num==leftWheel){
     m[0].direction |= B10111111; //panlinis
@@ -262,10 +273,43 @@ int16_t Motor::applyDirection(byte num)
 
 }  
 
+int16_t knowDir(byte num){
+  if(num==leftWheel){
+    m[0].direction |= B10111111; //panlinis
+    if(m[0].direction==0xFF)
+      {
+        return backward;
+      }
+        return forward;
+  }
+  else if(num==rightWheel){
+    m[1].direction |= B11111011;
+    if(m[1].direction==0xFF){
+      return backward;
+    }
+      return forward;
+          
+  }
+}
 
 void Motor::correctSpeed(byte num){
-  m[num].pastError = m[num].presentError;
-  
+  checkError(num);
+  m[num].pastError = m[num].currentError;
+  m[num].currentError = m[num].generalError/m[num].generalCounter;
+  m[num].sumError += m[num].currentError;
+  m[num].generalError = 0;
+  m[num].generalCounter =0;
+}
+
+
+void Motor::checkError(byte num){
+  if(m[num].generalCounter<2){
+    m[num].presentTime = millis();
+    m[num].actualTime =  (10000/(m[num].presentTime - m[num].pastTime));
+    m[num].actualTime = (m[num].actualTime)*applyDirection(num);
+    m[num].generalError += m[num].targetTime - m[num].actualTime;
+    m[num].generalCounter++;
+  }
 }
 
 ISR(INT2_vect)										//19
@@ -282,12 +326,16 @@ ISR(INT3_vect)
 ISR(INT6_vect)                                       //Interrupts used. Once it hits int6 before int 7, it means forward. Then the number of rotations will just
                                                      //increment every falling edge.
 {
+  float data =10;
   
  m[0].pastTime = m[0].presentTime;
  m[0].presentTime = millis();
- m[0].actualTime = (m[0].presentTime - m[0].pastTime);
+ m[0].actualTime =  (10000/(m[0].presentTime - m[0].pastTime));
+ m[0].actualTime = (m[0].actualTime)*knowDir(0);
  m[0].generalError += m[0].targetTime - m[0].actualTime;
  m[0].generalCounter++;
+
+ // Transceiver.println((String)(m[0].actualTime));
 
 // m[0].currentError = m[0].targetTime - m[0].actualTime;
 
@@ -298,4 +346,5 @@ ISR(INT7_vect)                                      //Same with interrupt 6 but 
 {
 m[0].direction = PINE;	
 } 
+
 
