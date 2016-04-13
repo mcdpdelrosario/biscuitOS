@@ -6,9 +6,11 @@
 typedef union {
   uint16_t data;
   char cdata[2];
+  uint8_t sdata[2];
 }sender;
 
 sender caller;
+sender combo;
 void sendData(String, const int);
 typedef void (* FunctionPointer_t) (char);
 struct pointme {
@@ -20,9 +22,15 @@ void Wifi::gather(String openingTag,String classifier,uint16_t data){
   String frame;
   String sendString;
 	caller.data=data;
-  char lengthdata=2;
+  char lengthdata;
+  lengthdata=Transceiver.getLength(caller.cdata);
   uint8_t datalength;
-  frame=openingTag + classifier + lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)(caller.cdata[0]+caller.cdata[1]);
+  combo.data=caller.sdata[0] + caller.sdata[1];
+  char temp = combo.cdata[0];
+  // Transceiver.print("\nchecksum0: "+(String)combo.cdata[0]);
+  temp = combo.cdata[1];
+  // Transceiver.print("\nchecksum1: "+(String)combo.cdata[1]);
+  frame=openingTag + classifier + (String)lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)combo.cdata[0] +(String)(combo.cdata[1]);
   // Transceiver.print("AT+CIPSEND=1,");
   datalength=Transceiver.getLength(frame);
   sendString="\r\nAT+CIPSEND=1,";
