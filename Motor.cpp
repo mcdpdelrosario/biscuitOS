@@ -343,7 +343,7 @@ void Motor::checkError(byte num){
     m[num].actualTime =  (10000/(m[num].presentTime - m[num].pastTime));
     m[num].actualTime = (m[num].actualTime)*applyDirection(num);
     m[num].generalError += m[num].targetTime - m[num].actualTime;
-    m[num].generalCounter++;   
+    m[num].generalCounter++;     
   } 
 }
 
@@ -351,8 +351,8 @@ void Motor::checkError(byte num){
 void Motor::PrintSpeed(byte num)
 { 
   // Transceiver.print((String)(m[num].generalError)+ "\t");
-  Transceiver.print(((String)(m[num].currentError))+"\t");
-  Transceiver.print ((String)(m[num].PID)+"\t");
+  // Transceiver.print(((String)(m[num].currentError))+"\t");
+  // Transceiver.print ((String)(m[num].PID)+"\t");
   Transceiver.print ((String)(m[num].actualTime)+"\t");
  // Transceiver.print(((String)(m[num].generalCounter))+ "\t");
  //  Transceiver.println((String)(m[num].actualTime));
