@@ -42,10 +42,14 @@ struct motors
   int16_t targetTime;
   int16_t pastError;
   int16_t currentError;
-  int16_t sumError =1000;
+  int16_t sumError =0;
   int16_t direction;
   int16_t generalError =0;
   int16_t generalCounter =0;
+  int16_t dTerm;
+  int16_t PID;
+  int16_t numberofticksTimeD;
+  int16_t percentDuty;
 
   PWMSoftware motorControl;
 };
@@ -100,31 +104,33 @@ void Motor::initialize(byte num, uint8_t motorPWMPin, uint8_t motorDirectionPin,
   DDRD &= B11111011;
 }
 
-void Motor::changeDirection(byte num, byte dir)
+void Motor::changeDirection(byte num, int8_t dir)
 {
 
   if(num==leftWheel)
   {
-    if(dir==1)
+    Transceiver.println((String)dir);
+    if(dir==forward)
     {
        PORTG = B00010000;                                     //Assembly code for digitalWrite of a pin, setting 1 as high and 0 as low
-      
+       Transceiver.println("forward"); 
     }
 
-    else if(dir==0)
+    else if(dir==backward)
     {
       PORTG = 0x00;
+      Transceiver.println("backward");
     }
   }
 
   else if(num==rightWheel)
   	{
-  		if(dir==1)
+  		if(dir==forward)
   		{
   			PORTE= B00000100;
   		}
 
-  		else if(dir==0)
+  		else if(dir==backward)
   		{
   			PORTE=0x00;
   		}
@@ -150,19 +156,28 @@ void Motor::setPeriod(byte num, uint16_t period)            //User sets the tota
     
 void Motor::setTime(byte num, int percent)                //Acts as the setDuty cycle, input is in percent
 {
-  uint16_t numberofticksTimeD;
-  uint16_t percentDuty;
-  m[num].percent = percent;                               //Percent to be converted again to the number of ticks
-  percentDuty = (m[num].period*m[num].percent)/1000;                   
-  numberofticksTimeD = percentDuty/(64e-3); 
-  m[num].motorControl.setPWM(numberofticksTimeD);
+
+ m[num].percent = percent;                               //Percent to be converted again to the number of ticks
+  m[num].percentDuty = (m[num].period*m[num].percent);             
+  m[num].percentDuty = abs(m[num].percentDuty)/1000;
+  m[num].numberofticksTimeD = m[num].percentDuty/(64e-3); 
+  m[num].motorControl.setPWM(m[num].numberofticksTimeD);
 
 }
 
-void Motor::setTarget(byte num, uint16_t targetTime)     //function used by the user to set the target ticks
+void Motor::setTarget(byte num, int16_t targetTime)     //function used by the user to set the target ticks
 { 
  
- m[num].targetTime = (10000/targetTime);
+ m[num].targetTime = targetTime;
+ // if(m[num].targetTime>0)
+ // {
+ //    changeDirection(num,backward);
+ // }
+
+ // else if(m[num].targetTime<0)
+ // {
+ //  changeDirection(num,forward); 
+ // }
 }
 
 
@@ -186,7 +201,7 @@ int16_t Motor::pastTime(byte num)                    //Function that returns the
 
 int16_t Motor::actualTime(byte num)                    //Function that returns the value of the actual Speed
 {
-  return m[num].actualTime;
+  return m[num].generalError;
 }
 
 int16_t Motor::currentError(byte num)                    //Function that returns the value of the actual Speed
@@ -293,17 +308,31 @@ int16_t knowDir(byte num){
 }
 
 void Motor::correctSpeed(byte num){
+
+
+  uint8_t kP = 10;
+  uint8_t kI = 5;
+  uint8_t kD = 5;
+
   checkError(num);
   m[num].pastError = m[num].currentError;
   m[num].currentError = m[num].generalError/m[num].generalCounter;
   m[num].sumError += m[num].currentError;
+   PrintSpeed(num);
   m[num].generalError = 0;
   m[num].generalCounter =0;
+
+  m[num].dTerm =  m[num].currentError - m[num].pastError;
+  // m[num].PID = -(m[num].sumError/kI) + (m[num].currentError/kP) + ;
+  m[num].PID = -(m[num].sumError/kI) + (m[num].currentError/kP);
+  //Transceiver.println((String)m[num].currentError);
+ setTime(num, m[num].PID);
+
 }
 
 
 void Motor::checkError(byte num){
-  if(m[num].generalCounter<2){
+  if(m[num].generalCounter<1){
     m[num].presentTime = millis();
     m[num].actualTime =  (10000/(m[num].presentTime - m[num].pastTime));
     m[num].actualTime = (m[num].actualTime)*applyDirection(num);
@@ -312,6 +341,13 @@ void Motor::checkError(byte num){
   }
 }
 
+
+void Motor::PrintSpeed(byte num)
+{ 
+  // Transceiver.print((String)(m[num].generalError)+ "\t");
+  Transceiver.println((String)(m[num].currentError));
+  // Transceiver.println("---------------------------");
+}
 ISR(INT2_vect)										//19
 {
   
