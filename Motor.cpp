@@ -150,7 +150,8 @@ void Motor::setPeriod(byte num, uint16_t period)            //User sets the tota
   {                                                        //Period to be converted to the number of ticks for the PWMSoftware function setPeriod
     m[num].period = 20;
   }
-  numberofticksTime = m[num].period / (64e-3);
+  // using prescaler 8 with a total number of ticks of 40000
+  numberofticksTime = m[num].period / (5e-4);   
   m[num].motorControl.setPeriod(numberofticksTime);
 
 }
@@ -161,7 +162,7 @@ void Motor::setTime(byte num, int percent)                //Acts as the setDuty 
  m[num].percent = percent;                               //Percent to be converted again to the number of ticks
   m[num].percentDuty = (m[num].period*m[num].percent);             
   m[num].percentDuty = abs(m[num].percentDuty)/1000;
-  m[num].numberofticksTimeD = m[num].percentDuty/(64e-3); 
+  m[num].numberofticksTimeD = m[num].percentDuty/(5e-4); 
   m[num].motorControl.setPWM(m[num].numberofticksTimeD);
 
 }
