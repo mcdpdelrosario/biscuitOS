@@ -109,28 +109,28 @@ void Motor::changeDirection(byte num, int8_t dir)
 
   if(num==leftWheel)
   {
-    Transceiver.println((String)dir);
-    if(dir==forward)
+    
+    if(dir==backward)
     {
        PORTG = B00010000;                                     //Assembly code for digitalWrite of a pin, setting 1 as high and 0 as low
-       Transceiver.println("forward"); 
+       
     }
 
-    else if(dir==backward)
+    else if(dir==forward)
     {
       PORTG = 0x00;
-      Transceiver.println("backward");
+  
     }
   }
 
   else if(num==rightWheel)
   	{
-  		if(dir==forward)
+  		if(dir==backward)
   		{
   			PORTE= B00000100;
   		}
 
-  		else if(dir==backward)
+  		else if(dir==forward)
   		{
   			PORTE=0x00;
   		}
@@ -169,15 +169,19 @@ void Motor::setTarget(byte num, int16_t targetTime)     //function used by the u
 { 
  
  m[num].targetTime = targetTime;
- // if(m[num].targetTime>0)
- // {
- //    changeDirection(num,backward);
- // }
+ if(m[num].targetTime>0)
+ {
+      
+    changeDirection(num,forward);
+ 
+ }
 
- // else if(m[num].targetTime<0)
- // {
- //  changeDirection(num,forward); 
- // }
+ else if(m[num].targetTime<0)
+ {
+
+  changeDirection(num,backward);
+  
+ }
 }
 
 
@@ -269,17 +273,18 @@ void Motor::getDirection(byte num)                            // FUnction that d
 
 int16_t Motor::applyDirection(byte num)
 {
+
   if(num==leftWheel){
-    m[0].direction |= B10111111; //panlinis
-    if(m[0].direction==0xFF)
+    m[leftWheel].direction |= B10111111; //panlinis
+    if(m[leftWheel].direction==0xFF)
       {
         return backward;
       }
         return forward;
   }
   else if(num==rightWheel){
-    m[1].direction |= B11111011;
-    if(m[1].direction==0xFF){
+    m[rightWheel].direction |= B11111011;
+    if(m[rightWheel].direction==0xFF){
       return backward;
     }
       return forward;
@@ -290,16 +295,16 @@ int16_t Motor::applyDirection(byte num)
 
 int16_t knowDir(byte num){
   if(num==leftWheel){
-    m[0].direction |= B10111111; //panlinis
-    if(m[0].direction==0xFF)
+    m[leftWheel].direction |= B10111111; //panlinis
+    if(m[leftWheel].direction==0xFF)
       {
         return backward;
       }
         return forward;
   }
   else if(num==rightWheel){
-    m[1].direction |= B11111011;
-    if(m[1].direction==0xFF){
+    m[rightWheel].direction |= B11111011;
+    if(m[rightWheel].direction==0xFF){
       return backward;
     }
       return forward;
@@ -318,7 +323,7 @@ void Motor::correctSpeed(byte num){
   m[num].pastError = m[num].currentError;
   m[num].currentError = m[num].generalError/m[num].generalCounter;
   m[num].sumError += m[num].currentError;
-   PrintSpeed(num);
+  PrintSpeed(num);
   m[num].generalError = 0;
   m[num].generalCounter =0;
 
@@ -333,43 +338,52 @@ void Motor::correctSpeed(byte num){
 
 void Motor::checkError(byte num){
   if(m[num].generalCounter<1){
+   // Transceiver.print(("c"));
     m[num].presentTime = millis();
     m[num].actualTime =  (10000/(m[num].presentTime - m[num].pastTime));
     m[num].actualTime = (m[num].actualTime)*applyDirection(num);
     m[num].generalError += m[num].targetTime - m[num].actualTime;
-    m[num].generalCounter++;
-  }
+    m[num].generalCounter++;   
+  } 
 }
 
 
 void Motor::PrintSpeed(byte num)
 { 
   // Transceiver.print((String)(m[num].generalError)+ "\t");
-  Transceiver.println((String)(m[num].currentError));
+  Transceiver.print(((String)(m[num].currentError))+"\t");
+  Transceiver.print ((String)(m[num].PID)+"\t");
+  Transceiver.print ((String)(m[num].actualTime)+"\t");
+ // Transceiver.print(((String)(m[num].generalCounter))+ "\t");
+ //  Transceiver.println((String)(m[num].actualTime));
   // Transceiver.println("---------------------------");
 }
 ISR(INT2_vect)										//19
 {
   
-  m[1].rotations++;
+ m[rightWheel].pastTime = m[rightWheel].presentTime;
+ m[rightWheel].presentTime = millis();
+ m[rightWheel].actualTime =  (10000/(m[rightWheel].presentTime - m[rightWheel].pastTime));
+ m[rightWheel].actualTime = (m[rightWheel].actualTime)*knowDir(rightWheel);
+ m[rightWheel].generalError += m[rightWheel].targetTime - m[rightWheel].actualTime;
+ m[rightWheel].generalCounter++;
 }
 
 ISR(INT3_vect)
 {
-	m[1].direction = PIND;
+	m[rightWheel].direction = PIND;
 }
 
 ISR(INT6_vect)                                       //Interrupts used. Once it hits int6 before int 7, it means forward. Then the number of rotations will just
                                                      //increment every falling edge.
 {
-  float data =10;
   
- m[0].pastTime = m[0].presentTime;
- m[0].presentTime = millis();
- m[0].actualTime =  (10000/(m[0].presentTime - m[0].pastTime));
- m[0].actualTime = (m[0].actualTime)*knowDir(0);
- m[0].generalError += m[0].targetTime - m[0].actualTime;
- m[0].generalCounter++;
+ m[leftWheel].pastTime = m[leftWheel].presentTime;
+ m[leftWheel].presentTime = millis();
+ m[leftWheel].actualTime =  (10000/(m[leftWheel].presentTime - m[leftWheel].pastTime));
+ m[leftWheel].actualTime = (m[leftWheel].actualTime)*knowDir(leftWheel);
+ m[leftWheel].generalError += m[leftWheel].targetTime - m[leftWheel].actualTime;
+ m[leftWheel].generalCounter++;
 
  // Transceiver.println((String)(m[0].actualTime));
 
@@ -380,7 +394,7 @@ ISR(INT6_vect)                                       //Interrupts used. Once it 
 
 ISR(INT7_vect)                                      //Same with interrupt 6 but if it hits first before interrupt 6, means the motor is in backward direction. 
 {
-m[0].direction = PINE;	
+m[leftWheel].direction = PINE;	
 } 
 
 
