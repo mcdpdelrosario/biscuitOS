@@ -355,8 +355,8 @@ void Motor::PrintSpeed(byte num)
   // Transceiver.print((String)(m[num].generalError)+ "\t");
   // Transceiver.print(((String)(m[num].currentError))+"\t");
   // Transceiver.print ((String)(m[num].PID)+"\t");
-  Transceiver.print ((String)(m[num].currentError)+"\t");
-  Transceiver.print ((String)(m[num].sumError)+"\t");
+  //Transceiver.print ((String)(m[num].currentError)+"\t");
+  //Transceiver.print ((String)(m[num].sumError)+"\t");
 
 
  // Transceiver.print(((String)(m[num].generalCounter))+ "\t");
