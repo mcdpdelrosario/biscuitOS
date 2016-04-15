@@ -20,7 +20,7 @@ uint8_t _letter;
 };
 
 
-static ImaginaryPWM PowerRanger;
+static ImaginaryPWM servoMiss;
 #endif
 
 

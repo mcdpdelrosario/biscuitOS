@@ -32,6 +32,7 @@ void UARTv1::print(String data){
   }
   UCSR0B |= 0x20;
 }
+
 void UARTv1::println(String data){
   uint8_t temp;
   temp = getLength(data);
@@ -44,7 +45,7 @@ void UARTv1::println(String data){
 char UARTv1::receive(){
   return Dequeue(RQ);
 }
-uint8_t getLength(String str){
+uint8_t UARTv1::getLength(String str){
   uint8_t num;
   num=0;
   while(str[num]!=0x00){
@@ -52,6 +53,7 @@ uint8_t getLength(String str){
   }
   return num;
 }
+
 void Enqueue(uint8_t queue_number, char data){
   if(DataQ[queue_number].tail == QUEUE_SIZE){
     return;
