@@ -2,68 +2,62 @@
 #include "Wifi.h"
 #include "UARTv1.h"
 #include "PWMSoftware.h"
+// #include <UARTv1/UARTv1.h>
 #include <avr/interrupt.h>
-typedef union {
-  uint16_t data;
-  char cdata[2];
-  uint8_t sdata[2];
-}sender;
 
-sender caller;
-sender combo;
-void sendData(String, const int);
-void advanceSendData(String, const int);
+// void control(char Command) {
+
+//   switch (Command) {
+//     case 'X':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(10);
+//     	//motorRight.setPWM(10);
+//         Transceiver.print("S\n");
+//       break;
+//     case 'W':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(300);
+//     	//motorRight.setPWM(300);
+//         Transceiver.print("W\n");
+//       break;
+//     case 'D':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(150);
+//     	//motorRight.setPWM(300);
+//         Transceiver.print("D\n");
+//       break;
+//     case 'A':
+//     	digitalWrite(42,LOW);
+//     	digitalWrite(43,LOW);
+//     	//motorLeft.setPWM(300);
+//     	//motorRight.setPWM(150);
+//         Transceiver.print("A\n");
+//       break;
+
+//     case 'S':
+//     	//digitalWrite(42,)
+//     	digitalWrite(42,HIGH);
+//     	digitalWrite(43,HIGH);
+//     	//motorLeft.setPWM(300);
+//     	//motorRight.setPWM(300);
+//         Transceiver.print("S\n");
+//       break;
+//     case 'F':
+//         Transceiver.print("F\n");
+//       break;
+//     default:
+//       break;
+//   }
+// }
+
 typedef void (* FunctionPointer_t) (char);
 struct pointme {
    FunctionPointer_t functions;
 };
 struct pointme p[10];
-
-void Wifi::gather(String openingTag,String classifier,uint16_t data){
-  String frame;
-  String sendString;
-	caller.data=data;
-  char lengthdata=2;
-  // lengthdata=Transceiver.getLength(caller.cdata);
-  uint8_t datalength;
-  combo.data=caller.sdata[0] + caller.sdata[1];
-  char temp = combo.cdata[0];
-  // Transceiver.print("\nchecksum0: "+(String)combo.cdata[0]);
-  temp = combo.cdata[1];
-  // Transceiver.print("\nchecksum1: "+(String)combo.cdata[1]);
-  // frame=openingTag + classifier + (String)lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)combo.cdata[0] +(String)(combo.cdata[1]);
-  char advFrame[7];
-  advFrame[0]=openingTag[0];
-  advFrame[1]=classifier[0];
-  advFrame[2]=2;
-  advFrame[3]=caller.cdata[0];
-  advFrame[4]=caller.cdata[1];
-  advFrame[5]=combo.cdata[0];
-  advFrame[6]=combo.cdata[1];
-  Transceiver.advancePrint(advFrame,7);
-  // Transceiver.print("AT+CIPSEND=1,");
-  // datalength=Transceiver.getLength(frame);
-  // sendString="\r\nAT+CIPSEND=1,7\r\n";
-  // sendString+=(String)(datalength)+"\r\n";
-  // sendData(sendString,100);
-  // advanceSendData(advFrame,100);
-  // Transceiver.print(sendString);
-}
-
-void advanceSendData(String command, const int timeout){
- String  response = "";
-    Transceiver.advancePrint(command,7);
-    long int time = millis();
-    while( (time+timeout) > millis())
-    {
-      while(Transceiver.peek()>0)
-      {
-        char c = Transceiver.receive();
-        response+=c;
-      }  
-    }
-//    Transceiver.print(response);
-}
 
 void Wifi::commands(void (*functionCallBack)(char))
 {
@@ -85,18 +79,16 @@ void sendData(String command, const int timeout){
 //    Transceiver.print(response);
 }
 
-char openingTag;
-
-void Wifi::initialize(char openTag, String apName, String pass){
-	openingTag=openTag;
-  sendData("AT+CWMODE=1\r\n",1000);  
+void Wifi::initialize(uint16_t baud, String apName, String pass){
+  Transceiver.start(baud);
   sendData("AT+CWJAP=\""+apName+"\",\""+pass+"\"\r\n",8000);  
 }
 
-void Wifi::listen(String ID, String portNumber, String IP){
+void Wifi::listen(String portNumber, String IP){
   sendData("AT+CIPMUX=1\r\n",1000);
-  sendData("AT+CIPSTART="+ ID +",\"TCP\",\""+ IP +"\","+portNumber+"\r\n",2000);
-  Transceiver.print("Connected!");
+  sendData("AT+CIPSERVER=1,"+portNumber+"\r\n",2000);
+  sendData("AT+CIPSTA=\""+IP+"\"\r\n",3000);
+  Transceiver.print("Connect Now!\n");
 }
 
 boolean statemachine = LOW;
@@ -107,7 +99,7 @@ void Wifi::receive(){
     char letter = Transceiver.receive();
   if(statemachine ==HIGH){
     if(letter == ']'){
-    // Transceiver.print((String)dataneed);
+//     Transceiver.send((String)dataneed);
       statemachine = LOW; 
     }
     else{
@@ -116,8 +108,9 @@ void Wifi::receive(){
       p[0].functions(letter);
     }
   }
-  else if(letter == openingTag){
+  else if(letter == '~'){
     statemachine = HIGH; 
   }
   }
 }
+
