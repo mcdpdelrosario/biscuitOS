@@ -150,7 +150,8 @@ void Motor::setPeriod(byte num, uint16_t period)            //User sets the tota
   {                                                        //Period to be converted to the number of ticks for the PWMSoftware function setPeriod
     m[num].period = 20;
   }
-  numberofticksTime = m[num].period / (64e-3);
+  // using prescaler 8 with a total number of ticks of 40000
+  numberofticksTime = m[num].period / (5e-4);   
   m[num].motorControl.setPeriod(numberofticksTime);
 
 }
@@ -161,7 +162,7 @@ void Motor::setTime(byte num, int percent)                //Acts as the setDuty 
  m[num].percent = percent;                               //Percent to be converted again to the number of ticks
   m[num].percentDuty = (m[num].period*m[num].percent);             
   m[num].percentDuty = abs(m[num].percentDuty)/1000;
-  m[num].numberofticksTimeD = m[num].percentDuty/(64e-3); 
+  m[num].numberofticksTimeD = m[num].percentDuty/(5e-4); 
   m[num].motorControl.setPWM(m[num].numberofticksTimeD);
 
 }
@@ -317,7 +318,7 @@ void Motor::correctSpeed(byte num){
 
 
   uint8_t kP = 10;
-  uint8_t kI = 5;
+  uint8_t kI = 10;
   uint8_t kD = 5;
 
   checkError(num);
@@ -330,7 +331,7 @@ void Motor::correctSpeed(byte num){
 
   m[num].dTerm =  m[num].currentError - m[num].pastError;
   // m[num].PID = -(m[num].sumError/kI) + (m[num].currentError/kP) + ;
-  m[num].PID = -(m[num].sumError/kI) + (m[num].currentError/kP);
+  m[num].PID = (m[num].sumError/kI) + (m[num].currentError/kP);
   //Transceiver.println((String)m[num].currentError);
  setTime(num, m[num].PID);
 
@@ -354,9 +355,12 @@ void Motor::PrintSpeed(byte num)
   // Transceiver.print((String)(m[num].generalError)+ "\t");
   // Transceiver.print(((String)(m[num].currentError))+"\t");
   // Transceiver.print ((String)(m[num].PID)+"\t");
-  Transceiver.print ((String)(m[num].actualTime)+"\t");
+  Transceiver.print ((String)(m[num].currentError)+"\t");
+  Transceiver.print ((String)(m[num].sumError)+"\t");
+
+
  // Transceiver.print(((String)(m[num].generalCounter))+ "\t");
- //  Transceiver.println((String)(m[num].actualTime));
+   Transceiver.println((String)(m[num].actualTime));
   // Transceiver.println("---------------------------");
 }
 ISR(INT2_vect)										//19
