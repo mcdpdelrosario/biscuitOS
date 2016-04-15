@@ -3,6 +3,7 @@
 #include "UARTv1.h"
 #include "PWMSoftware.h"
 #include <avr/interrupt.h>
+
 typedef union {
   uint16_t data;
   char cdata[2];
@@ -18,27 +19,40 @@ struct pointme {
 };
 struct pointme p[10];
 
+uint8_t sendState=0;
+
 void Wifi::gather(String openingTag,String classifier,uint16_t data){
-  String frame;
-  String sendString;
-	caller.data=data;
-  char lengthdata;
-  lengthdata=Transceiver.getLength(caller.cdata);
-  uint8_t datalength;
-  combo.data=caller.sdata[0] + caller.sdata[1];
-  char temp = combo.cdata[0];
-  // Transceiver.print("\nchecksum0: "+(String)combo.cdata[0]);
-  temp = combo.cdata[1];
-  // Transceiver.print("\nchecksum1: "+(String)combo.cdata[1]);
-  frame=openingTag + classifier + (String)lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)combo.cdata[0] +(String)(combo.cdata[1]);
-  // Transceiver.print("AT+CIPSEND=1,");
-  datalength=Transceiver.getLength(frame);
-  sendString="\r\nAT+CIPSEND=1,";
-  sendString+=(String)(datalength)+"\r\n";
-  sendData(sendString,100);
-  sendData(frame,100);
-  // Transceiver.print(sendString);
+  
+    String frame;
+    String sendString;
+    char lengthdata;
+    uint8_t datalength;
+    char temp;
+    caller.data=data;
+
+    lengthdata=Transceiver.getLength(caller.cdata);
+        combo.data=caller.sdata[0] + caller.sdata[1];
+    temp = combo.cdata[0];
+    temp = combo.cdata[1];
+    frame=openingTag + classifier + (String)lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)combo.cdata[0] +(String)(combo.cdata[1]) + "]";  
+    datalength=Transceiver.getLength(frame);
+    // Transceiver.print((String)datalength);
+    // delay(1000);
+    if(sendState==0){
+      Enqueue(SQ,frame);
+    sendString="\r\nAT+CIPSEND=1,";
+    sendString+=(String)(datalength)+"\r\n";
+    Transceiver.print(sendString);
+    sendState++;
+  }else{
+    Transceiver.print(Dequeue(SQ));
+    sendState=0;
+  }
+  
+  
 }
+
+
 
 void Wifi::commands(void (*functionCallBack)(char))
 {
