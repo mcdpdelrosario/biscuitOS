@@ -3,7 +3,7 @@
 #include <avr/interrupt.h>
 #define RQ 0
 #define SQ 1
-#define QUEUE_SIZE 100
+#define QUEUE_SIZE 254
 struct DataQ {
   char queue[QUEUE_SIZE];
   int8_t tail;
