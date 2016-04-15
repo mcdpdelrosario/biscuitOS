@@ -1,4 +1,7 @@
 
+
+
+
 #include "Arduino.h"
 #include "PWMSoftware.h"
 
@@ -78,8 +81,53 @@ void PWMSoftware::setPeriod(uint16_t noofTicks){
 *_TCCRnB = tempTCCRnB;
 }
 
+
+
 void PWMSoftware::setPWM(uint32_t noofTicks){
 *_OCRnX = noofTicks;
 }
 
+void PWMSoftware::detachPin(uint8_t timerNo,uint8_t ocrLetter){
+_timerNo = timerNo;
+_ocrLetter = ocrLetter;
+
+
+if(_timerNo == 3){
+	_TCCRnA = &TCCR3A;
+	tempTCCRnA |= 0x02;
+	if(_ocrLetter==1){
+		DDRE &= 0xF7;
+		tempTCCRnA &= 0x3E;
+		
+	}
+	if(_ocrLetter==2){
+		DDRE&=0xEF;
+		tempTCCRnA &= 0xCE;
+	}
+	if(_ocrLetter==3){
+		DDRE &=0xDF;
+		tempTCCRnA &=0xF2;
+	}
+	
+}
+
+else{
+	_TCCRnA = &TCCR1A;
+	tempTCCRnA |= 0x02;
+	if(_ocrLetter==1){
+		DDRB &=0xDF;
+		tempTCCRnA &= 0x3E;
+	}
+	if(_ocrLetter==2){
+		DDRB &= 0xBF;
+		tempTCCRnA &= 0xCE;
+	}
+	if(_ocrLetter==3){
+		DDRB &= 0x7F;
+		tempTCCRnA &=0xF2;
+	}
+	
+}
+	
+}
 
