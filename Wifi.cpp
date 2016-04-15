@@ -3,7 +3,6 @@
 #include "UARTv1.h"
 #include "PWMSoftware.h"
 #include <avr/interrupt.h>
-
 typedef union {
   uint16_t data;
   char cdata[2];
@@ -20,9 +19,8 @@ struct pointme {
 struct pointme p[10];
 
 uint8_t sendState=0;
-
+String secondFrame;
 void Wifi::gather(String openingTag,String classifier,uint16_t data){
-  
     String frame;
     String sendString;
     char lengthdata;
@@ -34,25 +32,19 @@ void Wifi::gather(String openingTag,String classifier,uint16_t data){
         combo.data=caller.sdata[0] + caller.sdata[1];
     temp = combo.cdata[0];
     temp = combo.cdata[1];
-    frame=openingTag + classifier + (String)lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)combo.cdata[0] +(String)(combo.cdata[1]) + "]";  
+    frame=openingTag + classifier + (String)lengthdata + (String)caller.cdata[0] + (String)caller.cdata[1] + (String)combo.cdata[0] +(String)(combo.cdata[1]);  
     datalength=Transceiver.getLength(frame);
-    // Transceiver.print((String)datalength);
-    // delay(1000);
-    if(sendState==0){
-      Enqueue(SQ,frame);
+    secondFrame=frame;
     sendString="\r\nAT+CIPSEND=1,";
     sendString+=(String)(datalength)+"\r\n";
     Transceiver.print(sendString);
-    sendState++;
-  }else{
-    Transceiver.print(Dequeue(SQ));
-    sendState=0;
-  }
-  
   
 }
 
+void Wifi::send(){
 
+  Transceiver.print(secondFrame);
+}
 
 void Wifi::commands(void (*functionCallBack)(char))
 {
@@ -77,7 +69,7 @@ void sendData(String command, const int timeout){
 char openingTag;
 
 void Wifi::initialize(char openTag, String apName, String pass){
-	openingTag=openTag;
+  openingTag=openTag;
   sendData("AT+CWMODE=1\r\n",1000);  
   sendData("AT+CWJAP=\""+apName+"\",\""+pass+"\"\r\n",8000);  
 }
@@ -96,7 +88,7 @@ void Wifi::receive(){
     char letter = Transceiver.receive();
   if(statemachine ==HIGH){
     if(letter == ']'){
-    // Transceiver.print((String)dataneed);
+    Transceiver.print((String)dataneed);
       statemachine = LOW; 
     }
     else{
@@ -106,6 +98,7 @@ void Wifi::receive(){
     }
   }
   else if(letter == openingTag){
+    Transceiver.print("gotOpen");
     statemachine = HIGH; 
   }
   }
