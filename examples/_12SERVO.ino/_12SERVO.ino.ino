@@ -74,6 +74,7 @@ servoF.setAngle(0);
 servoX.setAngle(0);
 servoY.setAngle(0);
 servoZ.setAngle(0);
+
 angle = servoA.getAngle();
 Transceiver.println((String)angle);
 angle = servoB.getAngle();
