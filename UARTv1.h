@@ -11,6 +11,7 @@ class UARTv1
     void println(String data);
 	char receive(); //for debugging
 	uint8_t peek();
+	uint8_t getLength(String);
   private:
 };
 static UARTv1 Transceiver;
